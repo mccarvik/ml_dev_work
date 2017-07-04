@@ -14,7 +14,6 @@ from scripts.ml_algorithms import *
 
 def run(inputs):
     # Temp to make testing quicker
-    pdb.set_trace()
     t0 = time.time()
     with DBHelper() as db:
         db.connect()
@@ -27,11 +26,12 @@ def run(inputs):
     df = removeUnnecessaryColumns(df)
     df = timeme(addTarget)(df)
     df = cleanData(df)
+    inputs = ['trailingPE', 'returnOnEquity']
     df = selectInputs(df, inputs)
     
     # timeme(run_perceptron)(df)
-    # timeme(logisticRegression)(df, tuple(inputs))
-    timeme(run_perceptron_multi)(df)
+    timeme(logisticRegression)(df, tuple(inputs))
+    # timeme(run_perceptron_multi)(df)
 
 def selectInputs(df, inputs):
     columns = inputs + ['target'] + ['target_proxy']
@@ -51,9 +51,8 @@ def addTarget(df):
     df['target_proxy'] = target
     df = df.dropna(subset = ['target_proxy'])
     df = df[df['target_proxy'] != 0]
-    # med = df['target_proxy'].median()
-    # df['target'] = df.apply(lambda x: targetToCat(x['target_proxy'], med), axis=1)
     breaks = np.percentile(df['target_proxy'], [25, 50, 75])
+    # breaks = np.percentile(df['target_proxy'], [50])
     df['target'] = df.apply(lambda x: targetToCatMulti(x['target_proxy'], breaks), axis=1)
     return df
 
@@ -85,9 +84,9 @@ def cleanData(df):
     df = df[df['divYield'] >= 0]
     
     # Temp for training purposes
-    # df = df[abs(df['trailingPE']) < 100]
+    df = df[abs(df['trailingPE']) < 100]
     # df = df[abs(df['priceToBook']) < 10]
-    # df = df[df['trailingPE'] > 0]
+    df = df[df['trailingPE'] > 0]
     df = df[df['divYield'] > 0]
     # df = df[df['divYield'] < 10]
     # df = df[df['debtToEquity'] < 5]

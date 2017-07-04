@@ -11,6 +11,6 @@ def timeme(method):
         startTime = round(time.time() * 1000, 3)
         result = method(*args, **kw)
         endTime = round(time.time() * 1000, 3)
-        print(endTime - startTime,'ms')
+        print((endTime - startTime) / 1000, ' seconds')
         return result
     return wrapper

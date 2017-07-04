@@ -51,7 +51,7 @@ def standardize(X_train, X_test=None):
     sc = StandardScaler()
     sc.fit(X_train)
     X_train_std = sc.transform(X_train)
-    if not X_test.empty:
+    if X_test != None:
         X_test_std = sc.transform(X_test)
         return (X_train_std, X_test_std)
     else:
