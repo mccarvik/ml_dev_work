@@ -48,6 +48,7 @@ def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
                    s=55, label='test set')
 
 def standardize(X_train, X_test=None):
+    # Standardization of the data --> everything based on std's from the mean
     sc = StandardScaler()
     sc.fit(X_train)
     X_train_std = sc.transform(X_train)

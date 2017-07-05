@@ -21,7 +21,7 @@ from utils.ml_utils import plot_decision_regions, standardize
 
 IMG_PATH = '/home/ubuntu/workspace/ml_dev_work/static/img/'
 
-def run_perceptron(df, eta=0.1, n_iter=10):
+def run_perceptron(df, xcols, eta=0.1, n_iter=10):
     ''' Takes the pruned dataframe and runs it through the perceptron class
     
         Parameters
@@ -39,7 +39,7 @@ def run_perceptron(df, eta=0.1, n_iter=10):
     '''
     t0 = time.time()
     y = df['target']
-    X = df[['divYield','priceToBook']]
+    X = df[list(xcols)]
     
     buy = df[df['target'] > 0][list(X.columns)].values
     sell = df[df['target'] < 0][list(X.columns)].values
@@ -68,10 +68,10 @@ def run_perceptron(df, eta=0.1, n_iter=10):
     app.logger.info("Done training data and creating charts, took {0} seconds".format(t1-t0))
     print("Done training data and creating charts, took {0} seconds".format(t1-t0))
     
-def run_perceptron_multi(df, eta=0.1, n_iter=15):
+def run_perceptron_multi(df, xcols, eta=0.1, n_iter=15):
     t0 = time.time()
     y = df['target']
-    X = df[['returnOnEquity','currentRatio']]
+    X = df[list(xcols)]
     
     # Split up the training and test data and standardize inputs
     X_train, X_test, y_train, y_test = \
@@ -106,10 +106,11 @@ def run_perceptron_multi(df, eta=0.1, n_iter=15):
     # app.logger.info("Done training data and creating charts, took {0} seconds".format(t1-t0))
     print("Done training data and creating charts, took {0} seconds".format(t1-t0))
 
-def adalinegdLearningExample(df, eta=0.1, n_iter=10):
+def adalinegdLearningExample(df, xcols, eta=0.1, n_iter=10):
     # Learning rate too high - overshoot global min
     y = df['target']
-    X = df[['trailingPE','priceToBook']]
+    X = df[list(xcols)]
+    
     fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(8, 4))
     ada1 = AdalineGD(n_iter=20, eta=0.01).fit(X, y)
     ax[0].plot(range(1, len(ada1.cost_) + 1), np.log10(ada1.cost_), marker='o')
@@ -129,9 +130,9 @@ def adalinegdLearningExample(df, eta=0.1, n_iter=10):
     plt.close()
     # plt.show()
     
-def adalineSGD(df, eta=0.1, n_iter=10):
+def adalineSGD(df, xcols, eta=0.1, n_iter=10):
     y = df['target']
-    X = df[['trailingPE','priceToBook']]
+    X = df[list(xcols)]
     
     # standardize features
     X_std = np.copy(X.values)
@@ -160,9 +161,9 @@ def adalineSGD(df, eta=0.1, n_iter=10):
     plt.savefig(IMG_PATH + 'adalinesgd_gd.png', dpi=300)
     plt.close()
 
-def adalineGD(df, eta=0.1, n_iter=10):
+def adalineGD(df, xcols, eta=0.1, n_iter=10):
     y = df['target']
-    X = df[['returnOnEquity','debtToEquity']]
+    X = df[list(xcols)]
     
     # standardize features
     X_std = np.copy(X.values)
@@ -188,11 +189,10 @@ def adalineGD(df, eta=0.1, n_iter=10):
     plt.savefig(IMG_PATH + 'adaline_3.png', dpi=300)
     plt.close()
     
-def logisticRegression(df, cols):
-    # Need this in case cols is tuple for timing purposes
-    cols = list(cols)
+def logisticRegression(df, xcols):
+    # Need xcols to be a tuple for the timeme method to work VERY HACKY
     y = df['target']
-    X = df[cols]
+    X = df[list(xcols)]
     X_std = standardize(X)
     X_train, X_test, y_train, y_test = \
           train_test_split(X_std, y, test_size=0.3, random_state=0)
@@ -201,11 +201,6 @@ def logisticRegression(df, cols):
     # mms = MinMaxScaler()
     # X_train_norm = mms.fit_transform(X_train)
     # X_test_norm = mms.transform(X_test)
-    
-    # Standardization of the data --> everything based on std's from the mean
-    stdsc = StandardScaler()
-    X_train_std = stdsc.fit_transform(X_train)
-    X_test_std = stdsc.transform(X_test)
     
     # C is the regularization parameter, (C = 1/lambda) --> The larger lambda is, 
     # the more regularized the weights are, the less susceptible the regression is 
@@ -223,7 +218,6 @@ def logisticRegression(df, cols):
     print(lr.intercept_)
     print(lr.coef_)
     
-    pdb.set_trace()
     plot_decision_regions(X_train_std, y_train.values, classifier=lr)
     plt.title('Logistic Regression')
     plt.xlabel(list(X.columns)[0])
@@ -232,3 +226,15 @@ def logisticRegression(df, cols):
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'log_reg_1.png', dpi=300)
     plt.close()
+
+def support_vector_machines(df, xcols):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=0.3, random_state=0)
+    
+    
+    

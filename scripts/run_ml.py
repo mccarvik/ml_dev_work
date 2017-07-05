@@ -23,15 +23,17 @@ def run(inputs):
     t1 = time.time()
     # app.logger.info("Done Retrieving data, took {0} seconds".format(t1-t0))
     print("Done Retrieving data, took {0} seconds".format(t1-t0))
+    
+    # Set final inputs here, need other ones previous to this for pruning
+    inputs = ['trailingPE', 'returnOnEquity']
+    
     df = removeUnnecessaryColumns(df)
     df = timeme(addTarget)(df)
     df = cleanData(df)
-    inputs = ['trailingPE', 'returnOnEquity']
     df = selectInputs(df, inputs)
     
-    # timeme(run_perceptron)(df)
     timeme(logisticRegression)(df, tuple(inputs))
-    # timeme(run_perceptron_multi)(df)
+    # timeme(run_perceptron_multi)(df, tuple(inputs))
 
 def selectInputs(df, inputs):
     columns = inputs + ['target'] + ['target_proxy']
