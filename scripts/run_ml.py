@@ -25,7 +25,7 @@ def run(inputs):
     print("Done Retrieving data, took {0} seconds".format(t1-t0))
     
     # Set final inputs here, need other ones previous to this for pruning
-    inputs = ['currentRatio', 'debtToEquity']
+    inputs = ['returnOnEquity', 'priceToBook']
     
     df = removeUnnecessaryColumns(df)
     df = timeme(addTarget)(df)
@@ -44,6 +44,7 @@ def selectInputs(df, inputs):
     return df
 
 def addTarget(df):
+    num_of_breaks = 10
     yr_avg_ret = 5
     target = []
     for ind, row in df.iterrows():
@@ -56,7 +57,9 @@ def addTarget(df):
     df['target_proxy'] = target
     df = df.dropna(subset = ['target_proxy'])
     df = df[df['target_proxy'] != 0]
-    breaks = np.percentile(df['target_proxy'], [25, 50, 75])
+    
+    break_arr = np.linspace(0, 100, num_of_breaks+1)[1:-1]
+    breaks = np.percentile(df['target_proxy'], break_arr)
     # breaks = np.percentile(df['target_proxy'], [50])
     df['target'] = df.apply(lambda x: targetToCatMulti(x['target_proxy'], breaks), axis=1)
     return df
@@ -102,7 +105,7 @@ def cleanData(df):
     
 
     # only look at the top 25 and bottom 25%
-    df = df[(df['target'] == 0) | (df['target'] == 3)]
+    df = df[(df['target'] == 0) | (df['target'] == 9)]
     # pdb.set_trace()
     return df
 

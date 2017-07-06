@@ -244,8 +244,8 @@ def support_vector_machines(df, xcols):
     print('Training accuracy:', svm.score(X_train, y_train))
     print('Test accuracy:', svm.score(X_test, y_test))
     
-    # plot_decision_regions(X_std, y, classifier=svm, test_idx=range(int(len(y)*(1-ts)), len(y)-1))
-    plot_decision_regions(X_std, y, classifier=svm)
+    plot_decision_regions(X_std, y.values, classifier=svm, test_break_idx=int(len(y)*(1-ts)))
+    # plot_decision_regions(X_std, y.values, classifier=svm)
     plt.title('Support Vector Machines')
     plt.xlabel(list(X.columns)[0])
     plt.ylabel(list(X.columns)[1])

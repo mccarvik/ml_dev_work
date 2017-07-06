@@ -13,7 +13,7 @@ def update_check(list1, list2):
             return True
     return False
     
-def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
+def plot_decision_regions(X, y, classifier, test_break_idx=None, resolution=0.02):
    # setup marker generator and color map
    markers = ('s', 'x', 'o', '^', 'v')
    colors = ('red', 'blue', 'lightgreen', 'gray', 'cyan')
@@ -36,8 +36,8 @@ def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
                    marker=markers[idx], label=cl)
 
    # highlight test samples
-   if test_idx:
-       X_test, y_test = X[test_idx, :], y[test_idx]
+   if test_break_idx:
+       X_test, y_test = X[test_break_idx:], y[test_break_idx:]
        plt.scatter(X_test[:, 0],
                    X_test[:, 1],
                    c='',
