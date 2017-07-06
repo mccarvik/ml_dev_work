@@ -14,6 +14,7 @@ from sklearn.cross_validation import train_test_split
 from sklearn.linear_model import Perceptron as perceptron_skl
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import Imputer, LabelEncoder, OneHotEncoder, MinMaxScaler, StandardScaler
+from sklearn.svm import SVC
 from algorithms.perceptron import Perceptron
 from algorithms.adalinegd import AdalineGD
 from algorithms.adalinesgd import AdalineSGD
@@ -233,8 +234,24 @@ def support_vector_machines(df, xcols):
     
     # Standardize and split the training nad test data
     X_std = standardize(X)
+    ts = 0.3
     X_train, X_test, y_train, y_test = \
-          train_test_split(X_std, y, test_size=0.3, random_state=0)
+          train_test_split(X_std, y, test_size=ts, random_state=0)
     
+    svm = SVC(kernel='linear', C=100.0, random_state=0)
+    svm.fit(X_train, y_train)
+    
+    print('Training accuracy:', svm.score(X_train, y_train))
+    print('Test accuracy:', svm.score(X_test, y_test))
+    
+    # plot_decision_regions(X_std, y, classifier=svm, test_idx=range(int(len(y)*(1-ts)), len(y)-1))
+    plot_decision_regions(X_std, y, classifier=svm)
+    plt.title('Support Vector Machines')
+    plt.xlabel(list(X.columns)[0])
+    plt.ylabel(list(X.columns)[1])
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.savefig(IMG_PATH + 'svm_1.png', dpi=300)
+    plt.close()
     
     

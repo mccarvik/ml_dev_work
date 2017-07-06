@@ -25,14 +25,17 @@ def run(inputs):
     print("Done Retrieving data, took {0} seconds".format(t1-t0))
     
     # Set final inputs here, need other ones previous to this for pruning
-    inputs = ['trailingPE', 'returnOnEquity']
+    inputs = ['currentRatio', 'debtToEquity']
     
     df = removeUnnecessaryColumns(df)
     df = timeme(addTarget)(df)
     df = cleanData(df)
     df = selectInputs(df, inputs)
+    df = df.reset_index().drop('index', 1)
+    print("There are {0} samples".format(len(df)))
     
-    timeme(logisticRegression)(df, tuple(inputs))
+    # timeme(logisticRegression)(df, tuple(inputs))
+    timeme(support_vector_machines)(df, tuple(inputs))
     # timeme(run_perceptron_multi)(df, tuple(inputs))
 
 def selectInputs(df, inputs):
@@ -89,12 +92,12 @@ def cleanData(df):
     df = df[abs(df['trailingPE']) < 100]
     # df = df[abs(df['priceToBook']) < 10]
     df = df[df['trailingPE'] > 0]
-    df = df[df['divYield'] > 0]
+    # df = df[df['divYield'] > 0]
     # df = df[df['divYield'] < 10]
-    # df = df[df['debtToEquity'] < 5]
-    df = df[df['returnOnEquity'] > 0]
-    df = df[df['returnOnEquity'] < 50]
-    df = df[df['currentRatio'] < 10]
+    df = df[df['debtToEquity'] < 10]
+    # df = df[df['returnOnEquity'] > 0]
+    # df = df[df['returnOnEquity'] < 50]
+    # df = df[df['currentRatio'] < 10]
     # df = df[df[''] > 0]
     
 
@@ -105,4 +108,5 @@ def cleanData(df):
 
 if __name__ == "__main__":
     run(['trailingPE', 'priceToBook', 'priceToSales', 'divYield', 'debtToEquity',
-        'returnOnEquity', 'netIncomeMargin', 'freeCashFlowPerShare', 'currentRatio'])
+        'returnOnEquity', 'netIncomeMargin', 'freeCashFlowPerShare', 'currentRatio',
+        'quickRatio','financialLeverage','capExToSales', 'priceToCashFlow'])
