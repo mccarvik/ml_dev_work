@@ -15,6 +15,9 @@ from sklearn.linear_model import Perceptron as perceptron_skl
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import Imputer, LabelEncoder, OneHotEncoder, MinMaxScaler, StandardScaler
 from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.ensemble import RandomForestClassifier
+
 from algorithms.perceptron import Perceptron
 from algorithms.adalinegd import AdalineGD
 from algorithms.adalinesgd import AdalineSGD
@@ -228,7 +231,7 @@ def logisticRegression(df, xcols):
     plt.savefig(IMG_PATH + 'log_reg_1.png', dpi=300)
     plt.close()
 
-def support_vector_machines(df, xcols):
+def support_vector_machines(df, xcols, C=100):
     y = df['target']
     X = df[list(xcols)]
     
@@ -238,20 +241,102 @@ def support_vector_machines(df, xcols):
     X_train, X_test, y_train, y_test = \
           train_test_split(X_std, y, test_size=ts, random_state=0)
     
-    svm = SVC(kernel='linear', C=100.0, random_state=0)
+    svm = SVC(kernel='linear', C=C, random_state=0)
     svm.fit(X_train, y_train)
     
     print('Training accuracy:', svm.score(X_train, y_train))
     print('Test accuracy:', svm.score(X_test, y_test))
     
-    plot_decision_regions(X_std, y.values, classifier=svm, test_break_idx=int(len(y)*(1-ts)))
-    # plot_decision_regions(X_std, y.values, classifier=svm)
+    # plot_decision_regions(X.values, y.values, classifier=svm, test_break_idx=int(len(y)*(1-ts)))
+    plot_decision_regions(X_std, y.values, classifier=svm)
     plt.title('Support Vector Machines')
     plt.xlabel(list(X.columns)[0])
     plt.ylabel(list(X.columns)[1])
     plt.legend(loc='upper left')
     plt.tight_layout()
-    plt.savefig(IMG_PATH + 'svm_1.png', dpi=300)
+    plt.savefig(IMG_PATH + 'svm_C' + str(C) + '.png', dpi=300)
     plt.close()
     
+def nonlinear_svm(df, xcols, C=100, gamma=0.10):
+    y = df['target']
+    X = df[list(xcols)]
     
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+    
+    svm = SVC(kernel='rbf', random_state=0, gamma=gamma, C=C)
+    svm.fit(X_train, y_train)
+    
+    print('Training accuracy:', svm.score(X_train, y_train))
+    print('Test accuracy:', svm.score(X_test, y_test))
+    
+    plot_decision_regions(X_std, y.values, classifier=svm)
+    plt.title('Support Vector Machines - Non Linear')
+    plt.xlabel(list(X.columns)[0])
+    plt.ylabel(list(X.columns)[1])
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.savefig(IMG_PATH + 'svm_nonlinear_C' + str(C) + '.png', dpi=300)
+    plt.close()
+    
+def decision_tree(df, xcols, md=3):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+    
+    tree = DecisionTreeClassifier(criterion='entropy', max_depth=md, random_state=0)
+    tree.fit(X_train, y_train)
+
+    print('Training accuracy:', tree.score(X_train, y_train))
+    print('Test accuracy:', tree.score(X_test, y_test))
+    
+    plot_decision_regions(X_std, y.values, classifier=tree)
+    plt.title('Decision Tree')
+    plt.xlabel(list(X.columns)[0])
+    plt.ylabel(list(X.columns)[1])
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.savefig(IMG_PATH + 'dec_tree' + '.png', dpi=300)
+    plt.close()
+    
+    export_graphviz(tree, 
+                  out_file='tree.dot', 
+                  feature_names=list(xcols))
+    
+    # execute "dot -Tpng tree.dot -o tree.png" to turn file into png file
+
+def random_forest(df, xcols, estimators=5):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+    
+    forest = RandomForestClassifier(criterion='entropy',
+                                  n_estimators=estimators, 
+                                  random_state=1,
+                                  n_jobs=3)
+    forest.fit(X_train, y_train)
+
+    print('Training accuracy:', forest.score(X_train, y_train))
+    print('Test accuracy:', forest.score(X_test, y_test))
+    
+    plot_decision_regions(X_std, y.values, classifier=forest)
+    plt.title('Randaom Forest (Decision Tree Ensemble)')
+    plt.xlabel(list(X.columns)[0])
+    plt.ylabel(list(X.columns)[1])
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.savefig(IMG_PATH + 'random_forest' + '.png', dpi=300)
+    plt.close()
