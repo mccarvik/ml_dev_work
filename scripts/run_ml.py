@@ -38,7 +38,9 @@ def run(inputs):
     # timeme(support_vector_machines)(df, tuple(inputs), C=1)
     # timeme(nonlinear_svm)(df, tuple(inputs), C=1)
     # timeme(decision_tree)(df, tuple(inputs), md=4)
-    timeme(random_forest)(df, tuple(inputs), estimators=3)
+    # timeme(random_forest)(df, tuple(inputs), estimators=3)
+    timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
+    
 
 def selectInputs(df, inputs):
     columns = inputs + ['target'] + ['target_proxy']

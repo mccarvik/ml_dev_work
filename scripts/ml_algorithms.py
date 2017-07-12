@@ -17,6 +17,7 @@ from sklearn.preprocessing import Imputer, LabelEncoder, OneHotEncoder, MinMaxSc
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 from algorithms.perceptron import Perceptron
 from algorithms.adalinegd import AdalineGD
@@ -339,4 +340,29 @@ def random_forest(df, xcols, estimators=5):
     plt.legend(loc='upper left')
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'random_forest' + '.png', dpi=300)
+    plt.close()
+    
+def k_nearest_neighbors(df, xcols, k=5):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+    
+    knn = KNeighborsClassifier(n_neighbors=k, p=2, metric='minkowski')
+    knn.fit(X_train, y_train)
+
+    print('Training accuracy:', knn.score(X_train, y_train))
+    print('Test accuracy:', knn.score(X_test, y_test))
+    
+    plot_decision_regions(X_std, y.values, classifier=knn)
+    plt.title('Randaom Forest (Decision Tree Ensemble)')
+    plt.xlabel(list(X.columns)[0])
+    plt.ylabel(list(X.columns)[1])
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.savefig(IMG_PATH + 'kkn' + '.png', dpi=300)
     plt.close()

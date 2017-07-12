@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn.preprocessing import StandardScaler
 
-IMG_PATH = '/home/ubuntu/workspace/ml_dev_work/static/img/'
-
 def update_check(list1, list2):
     for i,j in zip(list1, list2):
         if i != j:
@@ -68,13 +66,3 @@ def entropy(p):
   
 def error(p):
     return 1 - np.max([p, 1 - p])
-
-def createGraph(x_vals, y_vals, classifier, name):
-    plot_decision_regions(X_std, y.values, classifier=svm)
-    plt.title('Support Vector Machines - Non Linear')
-    plt.xlabel(list(X.columns)[0])
-    plt.ylabel(list(X.columns)[1])
-    plt.legend(loc='upper left')
-    plt.tight_layout()
-    plt.savefig(IMG_PATH + name  + '.png', dpi=300)
-    plt.close()
