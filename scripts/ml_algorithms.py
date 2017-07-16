@@ -194,7 +194,7 @@ def adalineGD(df, xcols, eta=0.1, n_iter=10):
     plt.savefig(IMG_PATH + 'adaline_3.png', dpi=300)
     plt.close()
     
-def logisticRegression(df, xcols):
+def logisticRegression(df, xcols, C=100, penalty='l1'):
     # Need xcols to be a tuple for the timeme method to work VERY HACKY
     y = df['target']
     X = df[list(xcols)]
@@ -210,8 +210,7 @@ def logisticRegression(df, xcols):
     # C is the regularization parameter, (C = 1/lambda) --> The larger lambda is, 
     # the more regularized the weights are, the less susceptible the regression is 
     # to overfitting aka the smaller C is, the more regularized
-    lr = LogisticRegression(C=100.0, random_state=0)
-    # lr.fit(X_train_std, y_train)
+    lr = LogisticRegression(C=C, random_state=0, penalty=penalty)
     lr.fit(X_train, y_train)
     
     # Shows the percentage of falling into each class
@@ -223,7 +222,7 @@ def logisticRegression(df, xcols):
     print(lr.intercept_)
     print(lr.coef_)
     
-    plot_decision_regions(X_train_std, y_train.values, classifier=lr)
+    # plot_decision_regions(X_std, y_train.values, classifier=lr)
     plt.title('Logistic Regression')
     plt.xlabel(list(X.columns)[0])
     plt.ylabel(list(X.columns)[1])

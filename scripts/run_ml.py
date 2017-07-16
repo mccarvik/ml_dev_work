@@ -5,7 +5,6 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import datetime, pdb, time
 import numpy as np
-
 from utils.helper_funcs import timeme
 from utils.data_utils import *
 from utils.db_utils import DBHelper
@@ -26,7 +25,7 @@ def run(inputs):
     print("Done Retrieving data, took {0} seconds".format(t1-t0))
     
     # Set final inputs here, need other ones previous to this for pruning
-    inputs = ['trailingPE', 'returnOnEquity']
+    # inputs = ['trailingPE', 'returnOnEquity']
     
     df = removeUnnecessaryColumns(df)
     df = addTarget(df, '5yrReturn')
@@ -35,11 +34,12 @@ def run(inputs):
     df = df.reset_index().drop('index', 1)
     print("There are {0} samples".format(len(df)))
     
+    timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
     # timeme(support_vector_machines)(df, tuple(inputs), C=1)
     # timeme(nonlinear_svm)(df, tuple(inputs), C=1)
     # timeme(decision_tree)(df, tuple(inputs), md=4)
     # timeme(random_forest)(df, tuple(inputs), estimators=3)
-    timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
+    # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
     
 
 def selectInputs(df, inputs):
