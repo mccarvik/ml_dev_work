@@ -34,12 +34,14 @@ def run(inputs):
     df = df.reset_index().drop('index', 1)
     print("There are {0} samples".format(len(df)))
     
-    timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
+    # timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
     # timeme(support_vector_machines)(df, tuple(inputs), C=1)
     # timeme(nonlinear_svm)(df, tuple(inputs), C=1)
     # timeme(decision_tree)(df, tuple(inputs), md=4)
     # timeme(random_forest)(df, tuple(inputs), estimators=3)
     # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
+    # timeme(sbs_run(df, tuple(inputs)))
+    timeme(random_forest_feature_importance(df, tuple(inputs)))
     
 
 def selectInputs(df, inputs):

@@ -22,9 +22,12 @@ from sklearn.neighbors import KNeighborsClassifier
 from algorithms.perceptron import Perceptron
 from algorithms.adalinegd import AdalineGD
 from algorithms.adalinesgd import AdalineSGD
+from algorithms.SBS import SBS
 from utils.ml_utils import plot_decision_regions, standardize
 
+
 IMG_PATH = '/home/ubuntu/workspace/ml_dev_work/static/img/'
+
 
 def run_perceptron(df, xcols, eta=0.1, n_iter=10):
     ''' Takes the pruned dataframe and runs it through the perceptron class
@@ -365,3 +368,78 @@ def k_nearest_neighbors(df, xcols, k=5):
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'kkn' + '.png', dpi=300)
     plt.close()
+    
+# Sequential Backward Selection
+def sbs_run(df, xcols, k_feats=2, est=KNeighborsClassifier(n_neighbors=3)):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+    
+    # selecting features
+    sbs = SBS(est, k_features=k_feats)
+    sbs.fit(X_train, y_train)
+    
+    # plotting performance of feature subsets
+    k_feat = [len(k) for k in sbs.subsets_]
+    plt.plot(k_feat, sbs.scores_, marker='o')
+    plt.ylim([0.7, 1.1])
+    plt.ylabel('Accuracy')
+    plt.xlabel('Number of features')
+    plt.grid()
+    plt.tight_layout()
+    plt.savefig(IMG_PATH + 'sbs.png', dpi=300)
+    
+    pdb.set_trace()
+    k5 = list(sbs.subsets_[10])
+    print(df.columns[1:][k5])
+    
+    est.fit(X_train, y_train)
+    print('Training accuracy:', est.score(X_train, y_train))
+    print('Test accuracy:', est.score(X_test, y_test))
+    
+    est.fit(X_train[:, k5], y_train)
+    print('Training accuracy:', est.score(X_train[:, k5], y_train))
+    print('Test accuracy:', est.score(X_test[:, k5], y_test))
+
+def random_forest_feature_importance(df, xcols):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+    
+    feat_labels = df[list(xcols)].columns
+    forest = RandomForestClassifier(n_estimators=10000,
+                                  random_state=0,
+                                  n_jobs=-1)
+    forest.fit(X_train, y_train)
+    importances = forest.feature_importances_
+    indices = np.argsort(importances)[::-1]
+    
+    for f in range(X_train.shape[1]):
+        print("%2d) %-*s %f" % (f + 1, 30, 
+            feat_labels[indices[f]], 
+            importances[indices[f]]))
+                    
+    plt.title('Feature Importances')
+    plt.bar(range(X_train.shape[1]), 
+                importances[indices],
+                color='lightblue', 
+                align='center')
+  
+    plt.xticks(range(X_train.shape[1]), 
+             feat_labels[indices], rotation=90)
+    plt.xlim([-1, X_train.shape[1]])
+    plt.tight_layout()
+    plt.savefig(IMG_PATH + 'random_forest_feat.png', dpi=300)
+    
+    X_selected = forest.transform(X_train, threshold=0.15)
+    print(X_selected.shape)
