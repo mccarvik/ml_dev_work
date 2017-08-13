@@ -40,8 +40,12 @@ def run(inputs):
     # timeme(decision_tree)(df, tuple(inputs), md=4)
     # timeme(random_forest)(df, tuple(inputs), estimators=3)
     # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
-    # timeme(sbs_run(df, tuple(inputs)))
-    timeme(random_forest_feature_importance(df, tuple(inputs)))
+    # timeme(sbs_run)(df, tuple(inputs))
+    # timeme(random_forest_feature_importance)(df, tuple(inputs))
+    # timeme(principal_component_analysis)(df, tuple(inputs))
+    # timeme(pca_scikit)(df, tuple(inputs))
+    # timeme(linear_discriminant_analysis)(df, tuple(inputs))
+    timeme(lda_scikit)(df, tuple(inputs))
     
 
 def selectInputs(df, inputs):
