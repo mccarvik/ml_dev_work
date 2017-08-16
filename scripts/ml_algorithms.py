@@ -1,5 +1,4 @@
 import sys, datetime, pdb, time
-sys.path.append('/usr/share/doc')
 sys.path.append("/usr/lib/python3/dist-packages")
 sys.path.append("/usr/local/lib/python3.4/dist-packages")
 sys.path.append("/usr/local/lib/python2.7/dist-packages")
@@ -10,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score
-from sklearn.cross_validation import train_test_split
+from sklearn.cross_validation import train_test_split, StratifiedKFold, cross_val_score
 from sklearn.linear_model import Perceptron as perceptron_skl
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import Imputer, LabelEncoder, OneHotEncoder, MinMaxScaler, StandardScaler
@@ -20,6 +19,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.lda import LDA
+from sklearn.pipeline import Pipeline
 
 from algorithms.perceptron import Perceptron
 from algorithms.adalinegd import AdalineGD
@@ -649,3 +649,41 @@ def lda_scikit(df, xcols):
     plt.legend(loc='lower left')
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'lda_scikit_test.png', dpi=300)
+    
+###################################
+# Model Evaluation
+###################################
+
+def kfold_cross_validation(df, xcols, folds=10):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+    
+    pipe_lr = Pipeline([('scl', StandardScaler()),
+            ('pca', PCA(n_components=2)),
+            ('clf', LogisticRegression(random_state=1))])
+
+    kfold = StratifiedKFold(y=y_train, 
+                            n_folds=folds,
+                            random_state=1)
+    
+    scores = []
+    for k, (train, test) in enumerate(kfold):
+        pipe_lr.fit(X_train[train], y_train.values[train])
+        score = pipe_lr.score(X_train[test], y_train.values[test])
+        scores.append(score)
+        print('Fold: %s, Class dist.: %s, Acc: %.3f' % (k+1, np.bincount(y_train.values[train]), score))
+    print('\nCV accuracy: %.3f +/- %.3f' % (np.mean(scores), np.std(scores)))
+
+    scores = cross_val_score(estimator=pipe_lr, 
+                             X=X_train, 
+                             y=y_train.values, 
+                             cv=10,
+                             n_jobs=1)
+    print('CV accuracy scores: %s' % scores)
+    print('CV accuracy: %.3f +/- %.3f' % (np.mean(scores), np.std(scores)))
