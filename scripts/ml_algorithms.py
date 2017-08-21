@@ -20,6 +20,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.lda import LDA
 from sklearn.pipeline import Pipeline
+from sklearn.learning_curve import learning_curve, validation_curve
 
 from algorithms.perceptron import Perceptron
 from algorithms.adalinegd import AdalineGD
@@ -400,7 +401,6 @@ def sbs_run(df, xcols, k_feats=2, est=KNeighborsClassifier(n_neighbors=3)):
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'sbs.png', dpi=300)
     
-    pdb.set_trace()
     k5 = list(sbs.subsets_[10])
     print(df.columns[1:][k5])
     
@@ -687,3 +687,101 @@ def kfold_cross_validation(df, xcols, folds=10):
                              n_jobs=1)
     print('CV accuracy scores: %s' % scores)
     print('CV accuracy: %.3f +/- %.3f' % (np.mean(scores), np.std(scores)))
+    
+def learning_curves(df, xcols):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+        
+    pipe_lr = Pipeline([('scl', StandardScaler()),
+            ('clf', LogisticRegression(penalty='l2', random_state=0))])
+
+    train_sizes, train_scores, test_scores = learning_curve(estimator=pipe_lr, 
+                                            X=X_train, y=y_train, 
+                                            train_sizes=np.linspace(0.1, 1.0, 10), 
+                                            cv=10, n_jobs=1)
+    
+    train_mean = np.mean(train_scores, axis=1)
+    train_std = np.std(train_scores, axis=1)
+    test_mean = np.mean(test_scores, axis=1)
+    test_std = np.std(test_scores, axis=1)
+    
+    plt.plot(train_sizes, train_mean, 
+             color='blue', marker='o', 
+             markersize=5, label='training accuracy')
+    plt.fill_between(train_sizes, 
+                     train_mean + train_std,
+                     train_mean - train_std, 
+                     alpha=0.15, color='blue')
+    plt.plot(train_sizes, test_mean, 
+             color='green', linestyle='--', 
+             marker='s', markersize=5, 
+             label='validation accuracy')
+    plt.fill_between(train_sizes, 
+                     test_mean + test_std,
+                     test_mean - test_std, 
+                     alpha=0.15, color='green')
+    plt.grid()
+    plt.xlabel('Number of training samples')
+    plt.ylabel('Accuracy')
+    plt.legend(loc='best')
+    plt.ylim([0.8, 1.0])
+    plt.tight_layout()
+    plt.savefig(IMG_PATH + 'learning_curve.png', dpi=300)
+    plt.close()
+
+def validation_curves(df, xcols):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+          
+    pipe_lr = Pipeline([('scl', StandardScaler()),
+            ('clf', LogisticRegression(penalty='l2', random_state=0))])
+    
+    param_range = [0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
+    train_scores, test_scores = validation_curve(
+                    estimator=pipe_lr, 
+                    X=X_train, 
+                    y=y_train, 
+                    param_name='clf__C', 
+                    param_range=param_range,
+                    cv=10)
+    
+    train_mean = np.mean(train_scores, axis=1)
+    train_std = np.std(train_scores, axis=1)
+    test_mean = np.mean(test_scores, axis=1)
+    test_std = np.std(test_scores, axis=1)
+    
+    plt.plot(param_range, train_mean, 
+             color='blue', marker='o', 
+             markersize=5, label='training accuracy')
+    plt.fill_between(param_range, train_mean + train_std,
+                     train_mean - train_std, alpha=0.15,
+                     color='blue')
+    plt.plot(param_range, test_mean, 
+             color='green', linestyle='--', 
+             marker='s', markersize=5, 
+             label='validation accuracy')
+    plt.fill_between(param_range, 
+                     test_mean + test_std,
+                     test_mean - test_std, 
+                     alpha=0.15, color='green')
+    plt.grid()
+    plt.xscale('log')
+    plt.legend(loc='best')
+    plt.xlabel('Parameter C')
+    plt.ylabel('Accuracy')
+    plt.ylim([0.8, 1.0])
+    plt.tight_layout()
+    plt.savefig(IMG_PATH + 'val_curve.png', dpi=300)
+    plt.close()

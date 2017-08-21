@@ -46,7 +46,9 @@ def run(inputs):
     # timeme(pca_scikit)(df, tuple(inputs))
     # timeme(linear_discriminant_analysis)(df, tuple(inputs))
     # timeme(lda_scikit)(df, tuple(inputs))
-    timeme(kfold_cross_validation)(df, tuple(inputs))
+    # timeme(kfold_cross_validation)(df, tuple(inputs))
+    timeme(learning_curves)(df, tuple(inputs))
+    timeme(validation_curves)(df, tuple(inputs))
     
 
 def selectInputs(df, inputs):
