@@ -21,6 +21,7 @@ from sklearn.decomposition import PCA, KernelPCA
 from sklearn.lda import LDA
 from sklearn.pipeline import Pipeline
 from sklearn.learning_curve import learning_curve, validation_curve
+from sklearn.grid_search import GridSearchCV
 
 from algorithms.perceptron import Perceptron
 from algorithms.adalinegd import AdalineGD
@@ -785,3 +786,57 @@ def validation_curves(df, xcols):
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'val_curve.png', dpi=300)
     plt.close()
+
+def grid_search_analysis(df, xcols):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+    
+    pipe_svc = Pipeline([('scl', StandardScaler()),
+                ('clf', SVC(random_state=1))])
+    
+    param_range = [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
+    
+    param_grid = [{'clf__C': param_range, 
+                   'clf__kernel': ['linear']},
+                     {'clf__C': param_range, 
+                      'clf__gamma': param_range, 
+                      'clf__kernel': ['rbf']}]
+    
+    gs = GridSearchCV(estimator=pipe_svc, 
+                      param_grid=param_grid, 
+                      scoring='accuracy', 
+                      cv=10,
+                      n_jobs=-1)
+    gs = gs.fit(X_train, y_train)
+    print(gs.best_score_)
+    print(gs.best_params_)
+    clf = gs.best_estimator_
+    clf.fit(X_train, y_train)
+    print('Test accuracy: %.3f' % clf.score(X_test, y_test))
+    
+    gs = GridSearchCV(estimator=pipe_svc, 
+                                param_grid=param_grid, 
+                                scoring='accuracy', 
+                                cv=2)
+    scores = cross_val_score(gs, X_train, y_train, scoring='accuracy', cv=5)
+    print('CV accuracy: %.3f +/- %.3f' % (np.mean(scores), np.std(scores)))
+    
+    gs = GridSearchCV(estimator=DecisionTreeClassifier(random_state=0), 
+                                param_grid=[{'max_depth': [1, 2, 3, 4, 5, 6, 7, None]}], 
+                                scoring='accuracy', 
+                                cv=2)
+    scores = cross_val_score(gs, X_train, y_train, scoring='accuracy', cv=5)
+    print('CV accuracy: %.3f +/- %.3f' % (np.mean(scores), np.std(scores)))
+    
+    
+    
+    
+    
+    
+    
