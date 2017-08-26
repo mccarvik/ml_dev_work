@@ -51,7 +51,7 @@ def run(inputs):
     # timeme(kfold_cross_validation)(df, tuple(inputs))
     # timeme(learning_curves)(df, tuple(inputs))
     # timeme(validation_curves)(df, tuple(inputs))
-    timeme(grid_search_analysis)(df, tuple(inputs))
+    # timeme(grid_search_analysis)(df, tuple(inputs))
     # timeme(precision_vs_recall)(df, tuple(inputs))
     
 
