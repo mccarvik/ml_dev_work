@@ -5,12 +5,15 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import datetime, pdb, time
 import numpy as np
+
 from utils.helper_funcs import timeme
 from utils.data_utils import *
 from utils.db_utils import DBHelper
+
 from scripts.ml_algorithms import *
 from scripts.model_evaluation import *
 from scripts.feature_selection import *
+from scripts.ensemble_methods import *
 
 
 def run(inputs):
@@ -53,6 +56,7 @@ def run(inputs):
     # timeme(validation_curves)(df, tuple(inputs))
     # timeme(grid_search_analysis)(df, tuple(inputs))
     # timeme(precision_vs_recall)(df, tuple(inputs))
+    timeme(majority_vote)(df, tuple(inputs))
     
 
 def selectInputs(df, inputs):
@@ -96,6 +100,7 @@ def cleanData(df):
     # To filter out errant data
     df = df[df['trailingPE'] != 0]
     df = df[df['priceToBook'] > 0]
+    df = df[df['priceToBook'] < 10]
     df = df[df['priceToSales'] != 0]
     df = df[df['divYield'] >= 0]
     
@@ -117,6 +122,7 @@ def cleanData(df):
     return df
 
 if __name__ == "__main__":
-    run(['trailingPE', 'priceToBook', 'priceToSales', 'divYield', 'debtToEquity',
-        'returnOnEquity', 'netIncomeMargin', 'freeCashFlowPerShare', 'currentRatio',
-        'quickRatio','financialLeverage','capExToSales', 'priceToCashFlow'])
+    run(['trailingPE', 'priceToBook'])
+    # run(['trailingPE', 'priceToBook', 'priceToSales', 'divYield', 'debtToEquity',
+    #     'returnOnEquity', 'netIncomeMargin', 'freeCashFlowPerShare', 'currentRatio',
+    #     'quickRatio','financialLeverage','capExToSales', 'priceToCashFlow'])

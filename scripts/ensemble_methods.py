@@ -8,16 +8,23 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from itertools import product
 
+from sklearn.metrics import roc_curve, auc, accuracy_score
 from sklearn.base import BaseEstimator, ClassifierMixin, clone
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.externals import six
 from sklearn.pipeline import _name_estimators, Pipeline
 from sklearn.cross_validation import train_test_split, cross_val_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.grid_search import GridSearchCV
+
+from utils.ml_utils import plot_decision_regions, standardize, IMG_PATH
 
 
-class MajorityVoteClassifier(BaseEstimator, 
-                             ClassifierMixin):
+class MajorityVoteClassifier(BaseEstimator, ClassifierMixin):
     """ A majority vote ensemble classifier
 
     Parameters
@@ -146,13 +153,17 @@ class MajorityVoteClassifier(BaseEstimator,
             return out
 
 def majority_vote(df, xcols):
-    pdb.set_trace()
-    iris = datasets.load_iris()
-    X, y = iris.data[50:, [1, 2]], iris.target[50:]
-    le = LabelEncoder()
-    y = le.fit_transform(y)
-    X_train, X_test, y_train, y_test =\
-           train_test_split(X, y, test_size=0.5, random_state=1)
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Need this just for specific cases, need postive results to be a value of 1
+    y = y.map({4:1, 0:0})
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
 
     clf1 = LogisticRegression(penalty='l2', 
                               C=0.001, 
@@ -168,7 +179,6 @@ def majority_vote(df, xcols):
     pipe3 = Pipeline([['sc', StandardScaler()],
                       ['clf', clf3]])
     clf_labels = ['Logistic Regression', 'Decision Tree', 'KNN']
-    
     
     # Majority Rule (hard) Voting
     mv_clf = MajorityVoteClassifier(
@@ -199,7 +209,7 @@ def majority_vote(df, xcols):
                  linestyle=ls, 
                  label='%s (auc = %0.2f)' % (label, roc_auc))
     
-    plt.legend(loc='lower right')
+    plt.legend(loc='best')
     plt.plot([0, 1], [0, 1], 
              linestyle='--', 
              color='gray', 
@@ -211,17 +221,17 @@ def majority_vote(df, xcols):
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.tight_layout()
-    plt.savefig(PL7 + 'roc.png', dpi=300)
+    plt.savefig(IMG_PATH + 'roc.png', dpi=300)
     plt.close()
     
-    sc = StandardScaler()
-    X_train_std = sc.fit_transform(X_train)
+    # sc = StandardScaler()
+    # X_train_std = sc.fit_transform(X_train)
         
     all_clf = [pipe1, clf2, pipe3, mv_clf]    
-    x_min = X_train_std[:, 0].min() - 1    
-    x_max = X_train_std[:, 0].max() + 1    
-    y_min = X_train_std[:, 1].min() - 1    
-    y_max = X_train_std[:, 1].max() + 1    
+    x_min = X_train[:, 0].min() - 1    
+    x_max = X_train[:, 0].max() + 1    
+    y_min = X_train[:, 1].min() - 1    
+    y_max = X_train[:, 1].max() + 1    
     xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.1),    
                          np.arange(y_min, y_max, 0.1))    
     f, axarr = plt.subplots(nrows=2, ncols=2,     
@@ -230,32 +240,32 @@ def majority_vote(df, xcols):
                             figsize=(7, 5))    
     for idx, clf, tt in zip(product([0, 1], [0, 1]),    
                             all_clf, clf_labels):    
-        clf.fit(X_train_std, y_train)    
+        clf.fit(X_train, y_train)    
         Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])    
-        Z = Z.reshape(xx.shape)    
+        Z = Z.reshape(xx.shape)
         axarr[idx[0], idx[1]].contourf(xx, yy, Z, alpha=0.3)    
-        axarr[idx[0], idx[1]].scatter(X_train_std[y_train==0, 0],     
-                                      X_train_std[y_train==0, 1],     
+        axarr[idx[0], idx[1]].scatter(X_train[y_train.values==0, 0],     
+                                      X_train[y_train.values==0, 1],     
                                       c='blue',     
                                       marker='^',    
                                       s=50)    
-        axarr[idx[0], idx[1]].scatter(X_train_std[y_train==1, 0],     
-                                      X_train_std[y_train==1, 1],     
+        axarr[idx[0], idx[1]].scatter(X_train[y_train.values==1, 0],     
+                                      X_train[y_train.values==1, 1],     
                                       c='red',     
                                       marker='o',    
                                       s=50)    
         axarr[idx[0], idx[1]].set_title(tt)    
     plt.text(-3.5, -4.5,     
-             s='Sepal width [standardized]',     
+             s=xcols[0],     
              ha='center', va='center', fontsize=12)    
     plt.text(-10.5, 4.5,     
-             s='Petal length [standardized]',     
+             s=xcols[1],     
              ha='center', va='center',     
              fontsize=12, rotation=90)    
     plt.tight_layout()
-    plt.savefig(PL7 + 'voting_panel.png', bbox_inches='tight', dpi=300)
+    plt.savefig(IMG_PATH + 'voting_panel.png', bbox_inches='tight', dpi=300)
     # print(mv_clf.get_params())
-        
+    
     params = {'decisiontreeclassifier__max_depth': [1, 2],    
               'pipeline-1__clf__C': [0.001, 0.1, 100.0]}    
         
