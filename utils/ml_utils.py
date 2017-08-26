@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn.preprocessing import StandardScaler
 
+IMG_PATH = '/home/ubuntu/workspace/ml_dev_work/static/img/'
+
 def update_check(list1, list2):
     for i,j in zip(list1, list2):
         if i != j:

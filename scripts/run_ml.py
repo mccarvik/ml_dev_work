@@ -9,6 +9,8 @@ from utils.helper_funcs import timeme
 from utils.data_utils import *
 from utils.db_utils import DBHelper
 from scripts.ml_algorithms import *
+from scripts.model_evaluation import *
+from scripts.feature_selection import *
 
 
 def run(inputs):
@@ -49,7 +51,8 @@ def run(inputs):
     # timeme(kfold_cross_validation)(df, tuple(inputs))
     # timeme(learning_curves)(df, tuple(inputs))
     # timeme(validation_curves)(df, tuple(inputs))
-    # timeme(grid_search_analysis)(df, tuple(inputs))
+    timeme(grid_search_analysis)(df, tuple(inputs))
+    # timeme(precision_vs_recall)(df, tuple(inputs))
     
 
 def selectInputs(df, inputs):
