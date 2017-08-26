@@ -19,6 +19,7 @@ from sklearn.cross_validation import train_test_split, cross_val_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier
 from sklearn.grid_search import GridSearchCV
 
 from utils.ml_utils import plot_decision_regions, standardize, IMG_PATH
@@ -279,3 +280,153 @@ def majority_vote(df, xcols):
         print("%0.3f+/-%0.2f %r" % (mean_score, scores.std() / 2, params))
     print('Best parameters: %s' % grid.best_params_)
     print('Accuracy: %.2f' % grid.best_score_)
+
+def bagging(df, xcols):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Need this just for specific cases, need postive results to be a value of 1
+    y = y.map({4:1, 0:0})
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+    
+    tree = DecisionTreeClassifier(criterion='entropy',     
+                                  max_depth=None,    
+                                  random_state=1)    
+    bag = BaggingClassifier(base_estimator=tree,    
+                            n_estimators=500,     
+                            max_samples=1.0,     
+                            max_features=1.0,     
+                            bootstrap=True,     
+                            bootstrap_features=False,     
+                            n_jobs=1,     
+                            random_state=1)
+    
+       
+        
+    tree = tree.fit(X_train, y_train)    
+    y_train_pred = tree.predict(X_train)    
+    y_test_pred = tree.predict(X_test)    
+    
+    tree_train = accuracy_score(y_train, y_train_pred)    
+    tree_test = accuracy_score(y_test, y_test_pred)    
+    print('Decision tree train/test accuracies %.3f/%.3f'    
+          % (tree_train, tree_test))    
+        
+    bag = bag.fit(X_train, y_train)    
+    y_train_pred = bag.predict(X_train)    
+    y_test_pred = bag.predict(X_test)    
+        
+    bag_train = accuracy_score(y_train, y_train_pred)     
+    bag_test = accuracy_score(y_test, y_test_pred)     
+    print('Bagging train/test accuracies %.3f/%.3f'    
+          % (bag_train, bag_test))
+    
+    x_min = X_train[:, 0].min() - 1    
+    x_max = X_train[:, 0].max() + 1    
+    y_min = X_train[:, 1].min() - 1    
+    y_max = X_train[:, 1].max() + 1    
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.1),    
+                         np.arange(y_min, y_max, 0.1))    
+    f, axarr = plt.subplots(nrows=1, ncols=2,     
+                            sharex='col',     
+                            sharey='row',     
+                            figsize=(8, 3))    
+        
+    for idx, clf, tt in zip([0, 1],    
+                            [tree, bag],    
+                            ['Decision Tree', 'Bagging']):    
+        clf.fit(X_train, y_train)    
+        Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])    
+        Z = Z.reshape(xx.shape)    
+        axarr[idx].contourf(xx, yy, Z, alpha=0.3)    
+        axarr[idx].scatter(X_train[y_train.values==0, 0],     
+                           X_train[y_train.values==0, 1],     
+                           c='blue', marker='^')    
+        axarr[idx].scatter(X_train[y_train.values==1, 0],     
+                           X_train[y_train.values==1, 1],     
+                           c='red', marker='o')    
+        axarr[idx].set_title(tt)    
+        
+    pdb.set_trace()
+    axarr[0].set_ylabel(xcols[1], fontsize=12)    
+    plt.text(10.2, -1.2,     
+             s=xcols[0],     
+             ha='center', va='center', fontsize=12)    
+    plt.tight_layout()    
+    plt.savefig(IMG_PATH + 'voting_panel_bagging.png', bbox_inches='tight', dpi=300)   
+
+
+def adaboost(df, xcols):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Need this just for specific cases, need postive results to be a value of 1
+    y = y.map({4:1, 0:0})
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
+          
+    tree = DecisionTreeClassifier(criterion='entropy', 
+                                  max_depth=1,
+                                  random_state=0)
+    
+    ada = AdaBoostClassifier(base_estimator=tree,
+                             n_estimators=500, 
+                             learning_rate=0.1,
+                             random_state=0)
+    
+    tree = tree.fit(X_train, y_train)
+    y_train_pred = tree.predict(X_train)
+    y_test_pred = tree.predict(X_test)
+    
+    tree_train = accuracy_score(y_train, y_train_pred)
+    tree_test = accuracy_score(y_test, y_test_pred)
+    print('Decision tree train/test accuracies %.3f/%.3f'
+          % (tree_train, tree_test))
+    
+    ada = ada.fit(X_train, y_train)
+    y_train_pred = ada.predict(X_train)
+    y_test_pred = ada.predict(X_test)
+    
+    ada_train = accuracy_score(y_train, y_train_pred) 
+    ada_test = accuracy_score(y_test, y_test_pred) 
+    print('AdaBoost train/test accuracies %.3f/%.3f'
+          % (ada_train, ada_test))
+    x_min, x_max = X_train[:, 0].min() - 1, X_train[:, 0].max() + 1
+    y_min, y_max = X_train[:, 1].min() - 1, X_train[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.1),
+                         np.arange(y_min, y_max, 0.1))
+    
+    f, axarr = plt.subplots(1, 2, sharex='col', sharey='row', figsize=(8, 3))
+    
+    for idx, clf, tt in zip([0, 1],
+                            [tree, ada],
+                            ['Decision Tree', 'AdaBoost']):
+        clf.fit(X_train, y_train)
+    
+        Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+        Z = Z.reshape(xx.shape)
+    
+        axarr[idx].contourf(xx, yy, Z, alpha=0.3)
+        axarr[idx].scatter(X_train[y_train.values == 0, 0],
+                           X_train[y_train.values == 0, 1],
+                           c='blue', marker='^')
+        axarr[idx].scatter(X_train[y_train.values == 1, 0],
+                           X_train[y_train.values == 1, 1],
+                           c='red', marker='o')
+        axarr[idx].set_title(tt)
+    
+    axarr[0].set_ylabel(xcols[0], fontsize=12)
+    plt.text(10.2, -1.2,
+             s=xcols[1],
+             ha='center', va='center', fontsize=12)
+    plt.tight_layout()
+    plt.savefig(IMG_PATH + 'adaboost.png', bbox_inches='tight', dpi=300)   

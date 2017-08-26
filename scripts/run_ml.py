@@ -56,7 +56,9 @@ def run(inputs):
     # timeme(validation_curves)(df, tuple(inputs))
     # timeme(grid_search_analysis)(df, tuple(inputs))
     # timeme(precision_vs_recall)(df, tuple(inputs))
-    timeme(majority_vote)(df, tuple(inputs))
+    # timeme(majority_vote)(df, tuple(inputs))
+    # timeme(bagging)(df, tuple(inputs))
+    timeme(adaboost)(df, tuple(inputs))
     
 
 def selectInputs(df, inputs):
