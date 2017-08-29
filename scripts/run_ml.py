@@ -14,6 +14,7 @@ from scripts.ml_algorithms import *
 from scripts.model_evaluation import *
 from scripts.feature_selection import *
 from scripts.ensemble_methods import *
+from scripts.continuous_variables import *
 
 
 def run(inputs):
@@ -58,7 +59,8 @@ def run(inputs):
     # timeme(precision_vs_recall)(df, tuple(inputs))
     # timeme(majority_vote)(df, tuple(inputs))
     # timeme(bagging)(df, tuple(inputs))
-    timeme(adaboost)(df, tuple(inputs))
+    # timeme(adaboost)(df, tuple(inputs))
+    timeme(heat_map)(df, tuple(inputs))
     
 
 def selectInputs(df, inputs):
@@ -124,7 +126,8 @@ def cleanData(df):
     return df
 
 if __name__ == "__main__":
-    run(['trailingPE', 'priceToBook'])
+    # run(['trailingPE', 'priceToBook'])
     # run(['trailingPE', 'priceToBook', 'priceToSales', 'divYield', 'debtToEquity',
     #     'returnOnEquity', 'netIncomeMargin', 'freeCashFlowPerShare', 'currentRatio',
     #     'quickRatio','financialLeverage','capExToSales', 'priceToCashFlow'])
+    run(['trailingPE', 'priceToBook', 'priceToSales', 'divYield', 'debtToEquity'])
