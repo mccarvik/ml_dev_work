@@ -74,6 +74,8 @@ def linear_regressor(df, xcols):
     plt.close()
     
     lin_regplot(np.transpose(np.array([X_train])), y_train, lr)
+    plt.savefig(IMG_PATH + 'lin_reg_cost.png', dpi=300)
+    plt.close()
     
     # Find the average return of a stock with PE = 20
     # Note: will give odd results if x values are standardized and input is not
@@ -248,16 +250,14 @@ def nonlinear(df, xcols):
              lw=2,     
              linestyle='--')    
         
-    plt.xlabel('% lower status of the population [LSTAT]')    
-    plt.ylabel('Price in $1000\'s [MEDV]')    
-    plt.legend(loc='upper right')    
+    plt.xlabel('x-val')    
+    plt.ylabel('Return')    
+    plt.legend(loc='best')    
     plt.tight_layout()
-    plt.savefig(PL10 + 'polyhouse_example.png', dpi=300)
+    plt.savefig(IMG_PATH + 'nonlinear_regr.png', dpi=300)
     plt.close()
     
-    X = df[['LSTAT']].values
-    y = df['MEDV'].values
-    
+    pdb.set_trace()
     # transform features
     X_log = np.log(X)
     y_sqrt = np.sqrt(y)
@@ -275,33 +275,31 @@ def nonlinear(df, xcols):
              color='blue', 
              lw=2)
     
-    plt.xlabel('log(% lower status of the population [LSTAT])')
-    plt.ylabel('$\sqrt{Price \; in \; \$1000\'s [MEDV]}$')
-    plt.legend(loc='lower left')
+    plt.xlabel('x-val')
+    plt.ylabel('Return')
+    plt.legend(loc='best')
     plt.tight_layout()
-    plt.savefig(PL10 + 'transform_example.png', dpi=300)
+    plt.savefig(IMG_PATH + 'sqrt_log.png', dpi=300)
 
-def random_forest_regression():
-    df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/housing/housing.data',     
-                     header=None, sep='\\s+')    
-    df.columns = ['CRIM', 'ZN', 'INDUS', 'CHAS',     
-                  'NOX', 'RM', 'AGE', 'DIS', 'RAD',     
-                  'TAX', 'PTRATIO', 'B', 'LSTAT', 'MEDV']
-    X = df[['LSTAT']].values
-    y = df['MEDV'].values
+def random_forest_regression(df, xcols):
+    y = df['target_proxy']
+    X = df[list(xcols)[0]]
+    X = np.transpose(np.array([X]))
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = \
+          train_test_split(X_std, y, test_size=ts, random_state=0)
     
     tree = DecisionTreeRegressor(max_depth=3)
     tree.fit(X, y)
     sort_idx = X.flatten().argsort()
     lin_regplot(X[sort_idx], y[sort_idx], tree)
-    plt.xlabel('% lower status of the population [LSTAT]')
-    plt.ylabel('Price in $1000\'s [MEDV]')
-    plt.savefig(PL10 + 'tree_regression.png', dpi=300)
+    plt.xlabel('x-val')
+    plt.ylabel('Return')
+    plt.savefig(IMG_PATH + 'tree_regression.png', dpi=300)
     plt.close()
-    
-    y = df['MEDV'].values
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.4, random_state=1)
     
     forest = RandomForestRegressor(n_estimators=1000, 
                                    criterion='mse', 
@@ -333,8 +331,8 @@ def random_forest_regression():
                 label='Test data')    
     plt.xlabel('Predicted values')    
     plt.ylabel('Residuals')    
-    plt.legend(loc='upper left')    
+    plt.legend(loc='best')    
     plt.hlines(y=0, xmin=-10, xmax=50, lw=2, color='red')    
     plt.xlim([-10, 50])    
     plt.tight_layout()
-    plt.savefig(PL10 + 'slr_residuals.png', dpi=300)
+    plt.savefig(IMG_PATH + 'slr_residuals.png', dpi=300)

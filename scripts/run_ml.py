@@ -65,9 +65,8 @@ def run(inputs):
     # timeme(linear_regression_sklearn)(df, tuple(inputs))
     # timeme(ransac)(df, tuple(inputs))
     # timeme(polynomial_regression)(df, tuple(inputs))
-    timeme(nonlinear)(df, tuple(inputs))
-    # timeme(random_forest_regression)(df, tuple(inputs))
-    
+    # timeme(nonlinear)(df, tuple(inputs))
+    timeme(random_forest_regression)(df, tuple(inputs))
     
 
 def selectInputs(df, inputs):

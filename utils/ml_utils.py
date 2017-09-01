@@ -72,6 +72,4 @@ def error(p):
 def lin_regplot(X, y, model):
     plt.scatter(X, y, c='lightblue')
     plt.plot(X, model.predict(X), color='red', linewidth=2)
-    plt.savefig(IMG_PATH + 'lin_reg_cost.png', dpi=300)
-    plt.close()
     return None
