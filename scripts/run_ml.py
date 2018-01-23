@@ -20,19 +20,25 @@ from scripts.continuous_variables import *
 def run(inputs):
     # Temp to make testing quicker
     t0 = time.time()
+    # tickers = pd.read_csv('/home/ubuntu/workspace/ml_dev_work/utils/snp500_ticks.csv', header=None)
+    tickers = pd.read_csv('/home/ubuntu/workspace/ml_dev_work/utils/dow_ticks.csv', header=None)
     with DBHelper() as db:
         db.connect()
-        df = db.select('morningstar', where = 'date in ("2006", "2007", "2008", \
-                        "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016")')
+        # df = db.select('morningstar', where = 'date in ("2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016")')
+        lis = ''
+        for t in list(tickers[0]):
+            lis += t + ", "
+        df = db.select('morningstar', where = 'ticker in (' + lis[:-2] + ')')
+        
     # Getting Dataframe
     # df = getKeyStatsDataFrame(table='morningstar', date='')
     t1 = time.time()
-    # app.logger.info("Done Retrieving data, took {0} seconds".format(t1-t0))
     print("Done Retrieving data, took {0} seconds".format(t1-t0))
     
     # Set final inputs here, need other ones previous to this for pruning
     # inputs = ['trailingPE', 'returnOnEquity']
     
+    # TODO: Do feature extraction from here
     df = removeUnnecessaryColumns(df)
     df = addTarget(df, '5yrReturn')
     df = cleanData(df)
