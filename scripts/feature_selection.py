@@ -21,15 +21,14 @@ from utils.ml_utils import plot_decision_regions, standardize, IMG_PATH
 
 
 # Sequential Backward Selection
-def sbs_run(df, xcols, k_feats=2, est=KNeighborsClassifier(n_neighbors=3)):
+def sbs_run(df, xcols, k_feats=5, est=KNeighborsClassifier(n_neighbors=3)):
     y = df['target']
     X = df[list(xcols)]
     
     # Standardize and split the training nad test data
     X_std = standardize(X)
     ts = 0.3
-    X_train, X_test, y_train, y_test = \
-          train_test_split(X_std, y, test_size=ts, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
     
     # selecting features
     sbs = SBS(est, k_features=k_feats)
@@ -45,8 +44,9 @@ def sbs_run(df, xcols, k_feats=2, est=KNeighborsClassifier(n_neighbors=3)):
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'sbs.png', dpi=300)
     
+    pdb.set_trace()
     k5 = list(sbs.subsets_[10])
-    print(df.columns[1:][k5])
+    print(df.columns[k5])
     
     est.fit(X_train, y_train)
     print('Training accuracy:', est.score(X_train, y_train))

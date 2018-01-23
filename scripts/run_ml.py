@@ -31,7 +31,6 @@ def run(inputs):
         df = db.select('morningstar', where = 'ticker in (' + lis[:-2] + ')')
         
     # Getting Dataframe
-    # df = getKeyStatsDataFrame(table='morningstar', date='')
     t1 = time.time()
     print("Done Retrieving data, took {0} seconds".format(t1-t0))
     
@@ -41,10 +40,11 @@ def run(inputs):
     # TODO: Do feature extraction from here
     df = removeUnnecessaryColumns(df)
     df = addTarget(df, '5yrReturn')
-    df = cleanData(df)
-    df = selectInputs(df, inputs)
-    df = df.reset_index().drop('index', 1)
+    # df = cleanData(df)
+    # df = selectInputs(df, inputs)
+    df = df.reset_index().drop('index', 1).set_index(['ticker', 'date'])
     print("There are {0} samples".format(len(df)))
+    # pdb.set_trace()
     
     # timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
     # timeme(support_vector_machines)(df, tuple(inputs), C=1)
@@ -52,7 +52,7 @@ def run(inputs):
     # timeme(decision_tree)(df, tuple(inputs), md=4)
     # timeme(random_forest)(df, tuple(inputs), estimators=3)
     # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
-    # timeme(sbs_run)(df, tuple(inputs))
+    timeme(sbs_run)(df, tuple(df.columns))
     # timeme(random_forest_feature_importance)(df, tuple(inputs))
     # timeme(principal_component_analysis)(df, tuple(inputs))
     # timeme(pca_scikit)(df, tuple(inputs))
@@ -72,7 +72,7 @@ def run(inputs):
     # timeme(ransac)(df, tuple(inputs))
     # timeme(polynomial_regression)(df, tuple(inputs))
     # timeme(nonlinear)(df, tuple(inputs))
-    timeme(random_forest_regression)(df, tuple(inputs))
+    # timeme(random_forest_regression)(df, tuple(inputs))
     
 
 def selectInputs(df, inputs):
@@ -81,7 +81,7 @@ def selectInputs(df, inputs):
     return df
 
 def addTarget(df, tgt):
-    num_of_breaks = 5
+    num_of_breaks = 4
     df['target_proxy'] = df[tgt]
     df = df.dropna(subset = ['target_proxy'])
     df = df[df['target_proxy'] != 0]
@@ -110,6 +110,8 @@ def removeUnnecessaryColumns(df):
     df = df[RATIOS + KEY_STATS + OTHER +
             GROWTH + MARGINS + RETURNS +
             PER_SHARE + INDEX]
+    pdb.set_trace()
+    df = df.drop(COLS_TO_DROP, axis=1)
     return df
 
 def cleanData(df):

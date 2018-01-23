@@ -41,7 +41,9 @@ def getKeyStatsDataFrame(date=datetime.date.today().strftime('%Y-%m-%d'), ticker
             else:
                 df = db.select(table)
     return df
-    
+ 
+
+COLS_TO_DROP = ["52WeekLow", "52WeekHigh", "ytdReturn", "50DayMvgAvg", "200DayMvgAvg"]  
     
 
 COL_MAP = {
