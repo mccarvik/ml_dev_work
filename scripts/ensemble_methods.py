@@ -153,6 +153,7 @@ class MajorityVoteClassifier(BaseEstimator, ClassifierMixin):
                     out['%s__%s' % (name, key)] = value
             return out
 
+
 def majority_vote(df, xcols):
     y = df['target']
     X = df[list(xcols)]
@@ -280,6 +281,7 @@ def majority_vote(df, xcols):
         print("%0.3f+/-%0.2f %r" % (mean_score, scores.std() / 2, params))
     print('Best parameters: %s' % grid.best_params_)
     print('Accuracy: %.2f' % grid.best_score_)
+
 
 def bagging(df, xcols):
     y = df['target']

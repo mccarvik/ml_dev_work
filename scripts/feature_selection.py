@@ -17,7 +17,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 from algorithms.SBS import SBS
-from utils.ml_utils import plot_decision_regions, standardize, IMG_PATH
+from utils.ml_utils import plot_decision_regions, standardize, IMG_PATH, IMG_ROOT
 
 
 # Sequential Backward Selection
@@ -37,17 +37,19 @@ def sbs_run(df, xcols, k_feats=5, est=KNeighborsClassifier(n_neighbors=3)):
     # plotting performance of feature subsets
     k_feat = [len(k) for k in sbs.subsets_]
     plt.plot(k_feat, sbs.scores_, marker='o')
-    plt.ylim([0.7, 1.1])
+    plt.ylim([0.0, 1.1])
     plt.ylabel('Accuracy')
     plt.xlabel('Number of features')
     plt.grid()
     plt.tight_layout()
-    plt.savefig(IMG_PATH + 'sbs.png', dpi=300)
+    plt.savefig(IMG_ROOT + 'dow/sbs.png', dpi=300)
     
-    pdb.set_trace()
-    k5 = list(sbs.subsets_[10])
+    
+    k5 = list(sbs.subsets_[-1])
     print(df.columns[k5])
-    
+    pdb.set_trace()
+    return
+
     est.fit(X_train, y_train)
     print('Training accuracy:', est.score(X_train, y_train))
     print('Test accuracy:', est.score(X_test, y_test))

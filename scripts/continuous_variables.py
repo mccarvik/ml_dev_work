@@ -84,7 +84,6 @@ def linear_regressor(df, xcols):
     print('Slope: %.3f' % lr.w_[1])
     print('Intercept: %.3f' % lr.w_[0])
 
-
 def linear_regression_sklearn(df, xcols):
     y = df['target_proxy']
     X = df[list(xcols)[0]]

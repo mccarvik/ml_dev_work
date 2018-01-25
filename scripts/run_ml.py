@@ -41,10 +41,9 @@ def run(inputs):
     df = removeUnnecessaryColumns(df)
     df = addTarget(df, '5yrReturn')
     # df = cleanData(df)
-    # df = selectInputs(df, inputs)
-    df = df.reset_index().drop('index', 1).set_index(['ticker', 'date'])
+    df = df.set_index(['ticker', 'date'])
+    df = selectInputs(df, inputs)
     print("There are {0} samples".format(len(df)))
-    # pdb.set_trace()
     
     # timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
     # timeme(support_vector_machines)(df, tuple(inputs), C=1)
@@ -52,7 +51,8 @@ def run(inputs):
     # timeme(decision_tree)(df, tuple(inputs), md=4)
     # timeme(random_forest)(df, tuple(inputs), estimators=3)
     # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
-    timeme(sbs_run)(df, tuple(df.columns))
+    # timeme(sbs_run)(df, tuple(inputs), est=DecisionTreeClassifier(criterion='entropy', max_depth=3, random_state=0))
+    timeme(sbs_run)(df, tuple(inputs))
     # timeme(random_forest_feature_importance)(df, tuple(inputs))
     # timeme(principal_component_analysis)(df, tuple(inputs))
     # timeme(pca_scikit)(df, tuple(inputs))
@@ -110,8 +110,6 @@ def removeUnnecessaryColumns(df):
     df = df[RATIOS + KEY_STATS + OTHER +
             GROWTH + MARGINS + RETURNS +
             PER_SHARE + INDEX]
-    pdb.set_trace()
-    df = df.drop(COLS_TO_DROP, axis=1)
     return df
 
 def cleanData(df):
@@ -140,8 +138,8 @@ def cleanData(df):
     return df
 
 if __name__ == "__main__":
-    run(['trailingPE'])
-    # run(['trailingPE', 'priceToBook', 'priceToSales', 'divYield', 'debtToEquity',
-    #     'returnOnEquity', 'netIncomeMargin', 'freeCashFlowPerShare', 'currentRatio',
-    #     'quickRatio','financialLeverage','capExToSales', 'priceToCashFlow'])
+    run(['trailingPE', 'priceToBook', 'priceToSales', 'divYield', 'debtToEquity',
+        'returnOnEquity', 'netIncomeMargin', 'freeCashFlowPerShare', 'currentRatio',
+        'quickRatio','financialLeverage','capExToSales', 'priceToCashFlow'
+        'epsGrowth', 'revenueGrowth', 'pegRatio'])
     # run(['trailingPE', 'priceToBook', 'priceToSales', 'divYield', 'debtToEquity'])
