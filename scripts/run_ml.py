@@ -37,13 +37,19 @@ def run(inputs):
     # grab the more recent data for testing later
     test_df, df = separateTrainTest(df)
     
+    # clean data
     df = removeUnnecessaryColumns(df)
     df = cleanData(df)
     df = addTarget(df, '3yrFwdReturn')
     df = df.set_index(['ticker', 'date'])
     df = selectInputs(df, inputs)
-    print("There are {0} samples".format(len(df)))
+    # drop all rows with NA's
+    size_before = len(df)
+    df = df.dropna()
+    print("There are {0} samples (removed {1} NA rows)".format(len(df), size_before - len(df)))
     pdb.set_trace()
+    
+    
     
     # TODO: Do feature extraction from here
     # Sequential Backward Selection - feature selection to see which are the most telling variable
