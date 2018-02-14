@@ -26,7 +26,6 @@ def sbs_run(df, xcols, k_feats=5, est=KNeighborsClassifier(n_neighbors=3), test=
     X = df[list(xcols)]
     
     # Standardize and split the training nad test data
-    pdb.set_trace()
     X_std = standardize(X)
     ts = 0.3
     if not test:
@@ -36,6 +35,7 @@ def sbs_run(df, xcols, k_feats=5, est=KNeighborsClassifier(n_neighbors=3), test=
     sbs = SBS(est, k_features=k_feats)
     sbs.fit(X_train, y_train)
     
+    pdb.set_trace()
     # plotting performance of feature subsets
     k_feat = [len(k) for k in sbs.subsets_]
     plt.plot(k_feat, sbs.scores_, marker='o')
