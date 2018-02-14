@@ -22,6 +22,7 @@ from utils.ml_utils import plot_decision_regions, standardize, IMG_PATH, IMG_ROO
 
 # Sequential Backward Selection
 def sbs_run(df, xcols, k_feats=5, est=KNeighborsClassifier(n_neighbors=3)):
+    pdb.set_trace()
     y = df['target']
     X = df[list(xcols)]
     
@@ -47,7 +48,6 @@ def sbs_run(df, xcols, k_feats=5, est=KNeighborsClassifier(n_neighbors=3)):
     
     k5 = list(sbs.subsets_[-1])
     print(df.columns[k5])
-    pdb.set_trace()
     return
 
     est.fit(X_train, y_train)

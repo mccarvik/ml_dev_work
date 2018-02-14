@@ -1,47 +1,4 @@
-import sys
-sys.path.append("/home/ubuntu/workspace/ml_dev_work")
-from utils.db_utils import *
 from collections import defaultdict
-
-def getKeyStatsDataFrame(date=datetime.date.today().strftime('%Y-%m-%d'), tickers=None, table='key_stats_yahoo'):    
-    ''' Will retrieve the key financial stats from the DB for a given day and tickers
-        Will also clean the dataframe data and add any custom columns
-    Parameters
-    ==========
-    date : date
-        Date of values retrieved
-        DEFAULT = Today
-    tickers : list of strings
-        list of tickers to be grabbed
-        DEFAULT = NONE, will grab everything for given day
-    table : string
-        The table we are pulling from
-        DEFAULT = key_stats_yahoo
-    
-    Return
-    ======
-    df : dataframe
-        The stats for the given day and tickers
-    '''
-    where_ticks = "(\""
-    if tickers:
-        for t in tickers:
-            where_ticks += t + "\",\""
-    where_ticks = where_ticks[:-2] + ")"
-    with DBHelper() as db:
-        db.connect()
-        if date != '':
-            if tickers:
-                df = db.select(table, where="date='{0}' and ticker in {1}".format(date, where_ticks))
-            else:
-                df = db.select(table, where="date='{0}'".format(date))
-        else:
-            if tickers:
-                df = db.select(table, where="ticker in {0}".format(where_ticks))
-            else:
-                df = db.select(table)
-    return df
-
 
 COL_MAP = {
     "Gross Margin %" : "grossMargin",                               # Margin
@@ -160,7 +117,7 @@ INCOME_AND_CASH_FLOW = ["grossProfit", "enterpriseValue", "cogs", "sga", "rd", "
                     "capSpending", "freeCashFlow", "workingCapital"]
 PER_SHARE = ["bookValuePerShare", "freeCashFlowPerShare", "revenuePerShare",
             "dividendPerShare"]
-RATIOS = ["sharpeRatio", "sortinoRatio", "currentRatio", "quickRatio", "financialLeverage", "debtToEquity", 
+RATIOS = ["sharpeRatio", "currentRatio", "quickRatio", "financialLeverage", "debtToEquity", 
         "interestCoverage", "capExToSales", "freeCashFlowToSales", "freeCashFlowToNetIncome",
         "trailingPE", "priceToBook", "priceToSales", "pegRatio", "assetTurnoverRatio",
         "treynorRatio", 'priceToCashFlow']
@@ -173,7 +130,6 @@ GROWTH = ["operatingCashFlowGrowth", "freeCashFlowGrowth", "revenueGrowth", "eps
 OTHER = ['shares', "payoutRatio", "taxRate", "marketCapital"]
 INDEX = ['date', 'ticker']
 KEY_STATS = ['currentPrice', "divYield", 'volatility', 'beta', 'marketCorr']
-FWD_RETURNS = ['1yrFwdReturn', '3yrFwdReturn', '5yrFwdReturn', '10yrFwdReturn',]
 
 # NOTES:
 # Below columns in Mil of local currency (usually USD)
