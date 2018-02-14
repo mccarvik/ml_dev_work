@@ -78,7 +78,6 @@ def run(inputs):
 
 
 def separateTrainTest(df):
-    pdb.set_trace()
     test_df = df[df.date == '2017']
     df = df[df.date != '2017']
     return test_df, df
@@ -120,7 +119,7 @@ def targetToCatMulti(x, breaks):
 
 
 def removeUnnecessaryColumns(df):
-    df = df[RATIOS + KEY_STATS + OTHER + GROWTH + MARGINS + RETURNS + PER_SHARE + INDEX]
+    df = df[RATIOS + KEY_STATS + OTHER + GROWTH + MARGINS + RETURNS + FWD_RETURNS + PER_SHARE + INDEX]
     return df
 
 

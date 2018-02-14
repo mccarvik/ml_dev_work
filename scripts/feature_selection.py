@@ -21,15 +21,16 @@ from utils.ml_utils import plot_decision_regions, standardize, IMG_PATH, IMG_ROO
 
 
 # Sequential Backward Selection
-def sbs_run(df, xcols, k_feats=5, est=KNeighborsClassifier(n_neighbors=3)):
-    pdb.set_trace()
+def sbs_run(df, xcols, k_feats=5, est=KNeighborsClassifier(n_neighbors=3), test=None):
     y = df['target']
     X = df[list(xcols)]
     
     # Standardize and split the training nad test data
+    pdb.set_trace()
     X_std = standardize(X)
     ts = 0.3
-    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
+    if not test:
+        X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
     
     # selecting features
     sbs = SBS(est, k_features=k_feats)
