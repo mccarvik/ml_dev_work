@@ -40,7 +40,7 @@ class AdalineSGD(object):
         self.shuffle = shuffle
         if random_state:
             seed(random_state)
-        
+    
     def fit(self, X, y):
         """ Fit training data.
 

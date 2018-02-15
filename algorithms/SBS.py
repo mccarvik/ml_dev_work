@@ -12,7 +12,9 @@ from itertools import combinations
 class SBS():
     def __init__(self, estimator, k_features, scoring=accuracy_score, test_size=0.25, random_state=1):
       self.scoring = scoring
-      self.estimator = clone(estimator)
+      pdb.set_trace()
+      # self.estimator = clone(estimator)
+      self.estimator = estimator
       self.k_features = k_features
       self.test_size = test_size
       self.random_state = random_state
@@ -27,7 +29,6 @@ class SBS():
         score = self._calc_score(X_train, y_train, X_test, y_test, self.indices_)
         self.scores_ = [score]
     
-        pdb.set_trace()
         while dim > self.k_features:
             scores = []
             subsets = []

@@ -1,4 +1,4 @@
-import sys, datetime, pdb, time
+import sys, datetime, pdb, time, warnings
 sys.path.append("/usr/lib/python3/dist-packages")
 sys.path.append("/usr/local/lib/python3.4/dist-packages")
 sys.path.append("/usr/local/lib/python2.7/dist-packages")
@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.cross_validation import train_test_split, StratifiedKFold, cross_val_score
@@ -21,21 +22,28 @@ from utils.ml_utils import plot_decision_regions, standardize, IMG_PATH, IMG_ROO
 
 
 # Sequential Backward Selection
-def sbs_run(df, xcols, k_feats=5, est=KNeighborsClassifier(n_neighbors=3), test=None):
+def sbs_run(df, xcols, k_feats=1, est=KNeighborsClassifier(n_neighbors=3), test=pd.DataFrame()):
     y = df['target']
     X = df[list(xcols)]
     
     # Standardize and split the training nad test data
     X_std = standardize(X)
-    ts = 0.3
-    if not test:
+    if test.empty:
+        ts = 0.3
         X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
+    else:
+        X_train = X_std
+        y_train = df['target']
+        test = test[list(xcols)]
+        X_test = standardize(test)
+        y_test = test['target']
     
     # selecting features
     sbs = SBS(est, k_features=k_feats)
     sbs.fit(X_train, y_train)
+    print("Removed Order, first to last: " + str(list(X.columns[sbs.removed_order])))
+    print("Chosen columns: " + str(list(X.columns[list(sbs.subsets_[-1])])))
     
-    pdb.set_trace()
     # plotting performance of feature subsets
     k_feat = [len(k) for k in sbs.subsets_]
     plt.plot(k_feat, sbs.scores_, marker='o')
@@ -44,12 +52,10 @@ def sbs_run(df, xcols, k_feats=5, est=KNeighborsClassifier(n_neighbors=3), test=
     plt.xlabel('Number of features')
     plt.grid()
     plt.tight_layout()
-    plt.savefig(IMG_ROOT + 'dow/sbs.png', dpi=300)
+    plt.savefig(IMG_ROOT + 'snp/sbs.png', dpi=300)
     
     
     k5 = list(sbs.subsets_[-1])
-    print(df.columns[k5])
-    return
 
     est.fit(X_train, y_train)
     print('Training accuracy:', est.score(X_train, y_train))
@@ -66,21 +72,16 @@ def random_forest_feature_importance(df, xcols):
     # Standardize and split the training nad test data
     X_std = standardize(X)
     ts = 0.3
-    X_train, X_test, y_train, y_test = \
-          train_test_split(X_std, y, test_size=ts, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
     
     feat_labels = df[list(xcols)].columns
-    forest = RandomForestClassifier(n_estimators=10000,
-                                  random_state=0,
-                                  n_jobs=-1)
+    forest = RandomForestClassifier(n_estimators=10000, random_state=0, n_jobs=-1)
     forest.fit(X_train, y_train)
     importances = forest.feature_importances_
     indices = np.argsort(importances)[::-1]
     
     for f in range(X_train.shape[1]):
-        print("%2d) %-*s %f" % (f + 1, 30, 
-            feat_labels[indices[f]], 
-            importances[indices[f]]))
+        print("%2d) %-*s %f" % (f + 1, 30, feat_labels[indices[f]], importances[indices[f]]))
                     
     plt.title('Feature Importances')
     plt.bar(range(X_train.shape[1]), 

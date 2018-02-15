@@ -1,9 +1,8 @@
-import sys
+import sys, warnings, datetime, pdb, time
 sys.path.append("/home/ubuntu/workspace/ml_dev_work")
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-import datetime, pdb, time
 import numpy as np
 
 from utils.helper_funcs import timeme
@@ -35,6 +34,7 @@ def run(inputs):
     print("Done Retrieving data, took {0} seconds".format(t1-t0))
     
     # grab the more recent data for testing later
+    # these wont have a target becuase the data is too recent
     test_df, df = separateTrainTest(df)
     
     # clean data
@@ -49,18 +49,15 @@ def run(inputs):
     print("There are {0} samples (removed {1} NA rows)".format(len(df), size_before - len(df)))
     pdb.set_trace()
     
+    # Select features
+    feature_selection(df, inputs)
     
-    
-    # TODO: Do feature extraction from here
-    # Sequential Backward Selection - feature selection to see which are the most telling variable
-    timeme(sbs_run)(df, tuple(inputs))
     # timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
     # timeme(support_vector_machines)(df, tuple(inputs), C=1)
     # timeme(nonlinear_svm)(df, tuple(inputs), C=1)
     # timeme(decision_tree)(df, tuple(inputs), md=4)
     # timeme(random_forest)(df, tuple(inputs), estimators=3)
     # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
-    # timeme(sbs_run)(df, tuple(inputs), est=DecisionTreeClassifier(criterion='entropy', max_depth=3, random_state=0))
     # timeme(random_forest_feature_importance)(df, tuple(inputs))
     # timeme(principal_component_analysis)(df, tuple(inputs))
     # timeme(pca_scikit)(df, tuple(inputs))
@@ -83,6 +80,16 @@ def run(inputs):
     # timeme(random_forest_regression)(df, tuple(inputs))
 
 
+def feature_selection(df, inputs):
+    # Sequential Backward Selection - feature selection to see which are the most telling variable
+    # timeme(sbs_run)(df, tuple(inputs))
+    # timeme(sbs_run)(df, tuple(inputs), est=DecisionTreeClassifier(criterion='entropy', max_depth=3, random_state=0))
+    # timeme(sbs_run)(df, tuple(inputs), est=RandomForestClassifier(criterion='entropy', n_estimators=3, random_state=1,n_jobs=3))
+    # timeme(sbs_run)(df, tuple(inputs), est=SVC(kernel='linear', C=100, random_state=0))
+    # timeme(sbs_run)(df, tuple(inputs), est=LogisticRegression(C=100, random_state=0, penalty='l1'))
+    timeme(sbs_run)(df, tuple(inputs), est=AdalineSGD(n_iter=15, eta=0.001, random_state=1))
+    
+
 def separateTrainTest(df):
     test_df = df[df.date == '2017']
     df = df[df.date != '2017']
@@ -96,7 +103,7 @@ def selectInputs(df, inputs):
 
 
 def addTarget(df, tgt):
-    num_of_breaks = 2
+    num_of_breaks = 3
     df['target_proxy'] = df[tgt]
     df = df.dropna(subset = ['target_proxy'])
     df = df[df['target_proxy'] != 0]

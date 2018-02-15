@@ -1,0 +1,15 @@
+K-means: ['freeCashFlowPerShare', 'pegRatio', 'priceToCashFlow', 'debtToEquity', 'financialLeverage', 
+'treynorRatio', 'beta', 'priceToSales', 'priceToBook', 'trailingPE', 'netIncomeMargin', 'volatility', 'epsGrowth', 
+'quickRatio', 'returnOnEquity', 'divYield', 'marketCorr', 'revenueGrowth', 'sortinoRatio', 'sharpeRatio', 'capExToSales', currentRatio]
+
+Decision Trees: ['capExToSales', 'revenueGrowth', 'treynorRatio', 'marketCorr', 'volatility', 
+'sortinoRatio', 'priceToCashFlow', 'quickRatio', 'currentRatio', 'freeCashFlowPerShare', 'netIncomeMargin', 'returnOnEquity', 
+'debtToEquity', 'priceToSales', 'priceToBook', 'trailingPE', 'financialLeverage', 'epsGrowth', 'divYield', 'pegRatio', 'beta', sharpeRatio]
+
+Random Forest: ['volatility', 'netIncomeMargin', 'currentRatio', 'trailingPE', 'financialLeverage', 'returnOnEquity', 
+'marketCorr', 'beta', 'sortinoRatio', 'priceToCashFlow', 'freeCashFlowPerShare', 'pegRatio', 'priceToBook', 'epsGrowth', 
+'quickRatio', 'debtToEquity', 'revenueGrowth', 'divYield', 'treynorRatio', 'priceToSales', 'sharpeRatio', 'capExToSales']
+
+Logistic Regression: ['financialLeverage', 'quickRatio', 'priceToCashFlow', 'volatility', 'debtToEquity', 'priceToBook', 
+'treynorRatio', 'epsGrowth', 'trailingPE', 'beta', 'pegRatio', 'capExToSales', 'returnOnEquity', 'freeCashFlowPerShare', 
+'revenueGrowth', 'priceToSales', 'netIncomeMargin', 'currentRatio', 'divYield', 'sortinoRatio', 'marketCorr', 'sharpeRatio']
