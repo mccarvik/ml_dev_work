@@ -65,6 +65,7 @@ def sbs_run(df, xcols, k_feats=1, est=KNeighborsClassifier(n_neighbors=3), test=
     print('Training accuracy:', est.score(X_train[:, k5], y_train))
     print('Test accuracy:', est.score(X_test[:, k5], y_test))
 
+
 def random_forest_feature_importance(df, xcols):
     y = df['target']
     X = df[list(xcols)]
@@ -75,28 +76,25 @@ def random_forest_feature_importance(df, xcols):
     X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
     
     feat_labels = df[list(xcols)].columns
-    forest = RandomForestClassifier(n_estimators=10000, random_state=0, n_jobs=-1)
+    forest = RandomForestClassifier(n_estimators=100, random_state=0, n_jobs=-1)
     forest.fit(X_train, y_train)
     importances = forest.feature_importances_
     indices = np.argsort(importances)[::-1]
     
     for f in range(X_train.shape[1]):
         print("%2d) %-*s %f" % (f + 1, 30, feat_labels[indices[f]], importances[indices[f]]))
-                    
+    
     plt.title('Feature Importances')
-    plt.bar(range(X_train.shape[1]), 
-                importances[indices],
-                color='lightblue', 
-                align='center')
+    plt.bar(range(X_train.shape[1]), importances[indices],color='lightblue', align='center')
   
-    plt.xticks(range(X_train.shape[1]), 
-             feat_labels[indices], rotation=90)
+    plt.xticks(range(X_train.shape[1]), feat_labels[indices], rotation=90)
     plt.xlim([-1, X_train.shape[1]])
     plt.tight_layout()
-    plt.savefig(IMG_PATH + 'random_forest_feat.png', dpi=300)
+    plt.savefig(IMG_ROOT + 'snp/random_forest_feat.png', dpi=300)
     
-    X_selected = forest.transform(X_train, threshold=0.15)
+    X_selected = forest.transform(X_train, threshold=0.05)
     print(X_selected.shape)
+
     
 def principal_component_analysis(df, xcols):
     y = df['target']
@@ -105,8 +103,7 @@ def principal_component_analysis(df, xcols):
     # Standardize and split the training nad test data
     X_std = standardize(X)
     ts = 0.3
-    X_train, X_test, y_train, y_test = \
-          train_test_split(X_std, y, test_size=ts, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
           
     cov_mat = np.cov(X_train.T)
     eigen_vals, eigen_vecs = np.linalg.eig(cov_mat)
@@ -115,10 +112,8 @@ def principal_component_analysis(df, xcols):
     var_exp = [(i / tot) for i in sorted(eigen_vals, reverse=True)]
     cum_var_exp = np.cumsum(var_exp)
     
-    plt.bar(range(1, 14), var_exp, alpha=0.5, align='center',
-         label='individual explained variance')
-    plt.step(range(1, 14), cum_var_exp, where='mid',
-          label='cumulative explained variance')
+    plt.bar(range(1, 14), var_exp, alpha=0.5, align='center', label='individual explained variance')
+    plt.step(range(1, 14), cum_var_exp, where='mid', label='cumulative explained variance')
     plt.ylabel('Explained variance ratio')
     plt.xlabel('Principal components')
     plt.legend(loc='best')
@@ -129,8 +124,7 @@ def principal_component_analysis(df, xcols):
     
     eigen_pairs = [(np.abs(eigen_vals[i]), eigen_vecs[:,i]) for i in range(len(eigen_vals))]
     eigen_pairs.sort(reverse=True)
-    w = np.hstack((eigen_pairs[0][1][:, np.newaxis],
-               eigen_pairs[1][1][:, np.newaxis]))
+    w = np.hstack((eigen_pairs[0][1][:, np.newaxis], eigen_pairs[1][1][:, np.newaxis]))
     # print('Matrix W:\n', w)
     
     X_train_pca = X_train.dot(w)
@@ -138,15 +132,14 @@ def principal_component_analysis(df, xcols):
     markers = ['s', 'x', 'o']
     
     for l, c, m in zip(np.unique(y_train), colors, markers):
-        plt.scatter(X_train_pca[y_train.values==l, 0], 
-                    X_train_pca[y_train.values==l, 1], 
-                    c=c, label=l, marker=m)
+        plt.scatter(X_train_pca[y_train.values==l, 0], X_train_pca[y_train.values==l, 1], c=c, label=l, marker=m)
     plt.xlabel('PC 1')
     plt.ylabel('PC 2')
     plt.legend(loc='lower left')
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'pca2.png', dpi=300)
-    
+
+
 def pca_scikit(df, xcols):
     y = df['target']
     X = df[list(xcols)]
@@ -178,6 +171,7 @@ def pca_scikit(df, xcols):
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'pca4.png', dpi=300)
     # plt.show()
+
     
 def linear_discriminant_analysis(df, xcols):
     y = df['target']
@@ -266,6 +260,7 @@ def linear_discriminant_analysis(df, xcols):
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'lda2.png', dpi=300)
 
+
 def lda_scikit(df, xcols):
     y = df['target']
     X = df[list(xcols)]
@@ -297,4 +292,3 @@ def lda_scikit(df, xcols):
     plt.legend(loc='lower left')
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'lda_scikit_test.png', dpi=300)
-    

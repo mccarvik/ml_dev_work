@@ -21,7 +21,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from algorithms.perceptron import Perceptron
 from algorithms.adalinegd import AdalineGD
 from algorithms.adalinesgd import AdalineSGD
-from utils.ml_utils import plot_decision_regions, standardize, IMG_PATH
+from utils.ml_utils import plot_decision_regions, standardize, IMG_PATH, IMG_ROOT
 
 
 def run_perceptron(df, xcols, eta=0.1, n_iter=10):
@@ -340,14 +340,14 @@ def random_forest(df, xcols, estimators=5):
     plt.close()
     
 def k_nearest_neighbors(df, xcols, k=5):
+    pdb.set_trace()
     y = df['target']
     X = df[list(xcols)]
     
     # Standardize and split the training nad test data
     X_std = standardize(X)
     ts = 0.3
-    X_train, X_test, y_train, y_test = \
-          train_test_split(X_std, y, test_size=ts, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
     
     knn = KNeighborsClassifier(n_neighbors=k, p=2, metric='minkowski')
     knn.fit(X_train, y_train)
@@ -361,5 +361,5 @@ def k_nearest_neighbors(df, xcols, k=5):
     plt.ylabel(list(X.columns)[1])
     plt.legend(loc='upper left')
     plt.tight_layout()
-    plt.savefig(IMG_PATH + 'kkn' + '.png', dpi=300)
+    plt.savefig(IMG_ROOT + 'snp/kmeans/kkn.png', dpi=300)
     plt.close()
