@@ -229,7 +229,8 @@ def addTimelineCustomCols(df, qr, vol_window=252):
             df.at[ix, 'volatility'] = np.nan
             print("May not have the quote data necessary for these calcs")
     
-    df['sharpeRatio'] = df['3yrReturn'] / df['volatility']                      
+    df['sharpeRatio'] = df['3yrReturn'] / df['volatility']
+    pdb.set_trace()
     df['downsideVol'] = downside_vol(df, qr, vol_window) / df['mv_avg_for_vol'] * 100 
     df['sortinoRatio'] = df['3yrReturn'] / df['downsideVol']
     df = df.drop(['mv_avg_for_vol', 'last_day'], axis=1)
