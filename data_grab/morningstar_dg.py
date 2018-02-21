@@ -60,7 +60,6 @@ def getData(tickers=None):
                 makeAPICall(t)
                 success.append(t)
             except:
-                pdb.set_trace()
                 failure.append(t)
                 print("Failed " + t + "\t")
                 exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -163,13 +162,15 @@ def addCustomColumns(df, market_upd=False):
     except:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         print("Could not read time series data for {3}: {0}, {1}, {2}".format(exc_type, exc_tb.tb_lineno, exc_obj, df.index.get_level_values('ticker')[0]))
+        raise
         
     
     try:
         df = addBasicCustomCols(df, qr)
         df = addGrowthCustomCols(df, qr)
         df = addTimelineCustomCols(df, qr)
-    except:
+    except Exception as e:
+        pdb.set_trace()
         exc_type, exc_obj, exc_tb = sys.exc_info()
         print("Issue adding columns {3}: {0}, {1}, {2}".format(exc_type, exc_tb.tb_lineno, exc_obj, df.index.get_level_values('ticker')[0]))
         raise
@@ -212,17 +213,25 @@ def addTimelineCustomCols(df, qr, vol_window=252):
     df['200DayMvgAvg'] = ''
     df['mv_avg_for_vol'] = ''
     df['volatility'] = ''
+    df = df.reset_index().set_index(['date', 'month'])
     for ix, row in df.iterrows():
-        df.at[ix, 'last_day'] =  quotes[quotes['Date'] >= datetime.date(int(ix[1]),int(row.month),1)].iloc[0]['Date']
-        df.at[ix, '50DayMvgAvg'] =  float(quotes[quotes['Date'] == df.ix[ix].last_day]['mv_avg_50'])
-        df.at[ix, '200DayMvgAvg'] =  float(quotes[quotes['Date'] == df.ix[ix].last_day]['mv_avg_200'])
-        df.at[ix, 'mv_avg_for_vol'] =  float(quotes[quotes['Date'] == df.ix[ix].last_day]['mv_avg_for_vol'])
-        df.at[ix, 'volatility'] = float(quotes[quotes['Date'] == df.ix[ix].last_day]['vol_stdev']) / float(quotes[quotes['Date'] == df.ix[ix].last_day]['mv_avg_for_vol']) * 100
-
+        try:
+            df.at[ix, 'last_day'] =  quotes[quotes['Date'] >= datetime.date(int(ix[0]),int(ix[1]),1)].iloc[0]['Date']
+            df.at[ix, '50DayMvgAvg'] =  float(quotes[quotes['Date'] == df.ix[ix].last_day]['mv_avg_50'])
+            df.at[ix, '200DayMvgAvg'] =  float(quotes[quotes['Date'] == df.ix[ix].last_day]['mv_avg_200'])
+            df.at[ix, 'mv_avg_for_vol'] =  float(quotes[quotes['Date'] == df.ix[ix].last_day]['mv_avg_for_vol'])
+            df.at[ix, 'volatility'] = float(quotes[quotes['Date'] == df.ix[ix].last_day]['vol_stdev']) / float(quotes[quotes['Date'] == df.ix[ix].last_day]['mv_avg_for_vol']) * 100
+        except Exception as e:
+            df.at[ix, 'last_day'] =  np.nan
+            df.at[ix, '50DayMvgAvg'] =  np.nan
+            df.at[ix, '200DayMvgAvg'] =  np.nan
+            df.at[ix, 'mv_avg_for_vol'] =  np.nan
+            df.at[ix, 'volatility'] = np.nan
+            print("May not have the quote data necessary for these calcs")
     
-    df['sharpeRatio'] = df['5yrReturn'] / df['volatility']                      
+    df['sharpeRatio'] = df['3yrReturn'] / df['volatility']                      
     df['downsideVol'] = downside_vol(df, qr, vol_window) / df['mv_avg_for_vol'] * 100 
-    df['sortinoRatio'] = df['5yrReturn'] / df['downsideVol']
+    df['sortinoRatio'] = df['3yrReturn'] / df['downsideVol']
     df = df.drop(['mv_avg_for_vol', 'last_day'], axis=1)
     return df
 
@@ -256,10 +265,14 @@ def downside_vol(df, qr, vol_window):
     qr['change'] = qr['Close'].pct_change(1)
     df['downsideVol'] = ''
     for ix, row in df.iterrows():
-        date_ix = qr[qr['Date'] == df.ix[ix].last_day].index.values[0]
-        start_ix = date_ix - vol_window if date_ix - vol_window > 0 else 0
-        q_wind = qr[start_ix : date_ix]
-        df.at[ix, 'downsideVol'] = q_wind[q_wind['change'] < 0]['Close'].std()
+        try:
+            date_ix = qr[qr['Date'] == df.ix[ix].last_day].index.values[0]
+            start_ix = date_ix - vol_window if date_ix - vol_window > 0 else 0
+            q_wind = qr[start_ix : date_ix]
+            df.at[ix, 'downsideVol'] = q_wind[q_wind['change'] < 0]['Close'].std()
+        except Exception as e:
+            df.at[ix, 'downsideVol'] = np.nan
+            print("May not have the quote data necessary for these calcs")
     return df['downsideVol']
 
 
@@ -364,5 +377,6 @@ def sendToDB(df):
 
 
 if __name__ == "__main__":
-    # getData(['MSFT'])
+    # getData(['YUM'])
+    # getData(['ATVI'])
     getData()

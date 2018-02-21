@@ -147,8 +147,7 @@ def pca_scikit(df, xcols):
     # Standardize and split the training nad test data
     X_std = standardize(X)
     ts = 0.3
-    X_train, X_test, y_train, y_test = \
-          train_test_split(X_std, y, test_size=ts, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
     
     pca = PCA(n_components=2)
     lr = LogisticRegression()

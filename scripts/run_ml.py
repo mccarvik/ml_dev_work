@@ -52,26 +52,23 @@ def run(inputs):
     # Select features
     # feature_selection(df, inputs)
     
-    # K-Means Analysis
-    timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
+    # Feature Extraction
+    # feature_extraction(df, inputs)
     
-    
+    # Algorithms
     # timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
+    # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
     # timeme(support_vector_machines)(df, tuple(inputs), C=1)
     # timeme(nonlinear_svm)(df, tuple(inputs), C=1)
     # timeme(decision_tree)(df, tuple(inputs), md=4)
     # timeme(random_forest)(df, tuple(inputs), estimators=3)
+    # timeme(adalinesgd)(df, tuple(inputs), estimators=3)
+    
+    # Model Evaluation
+    model_evaluation(df, inputs)
     
     
-    # timeme(principal_component_analysis)(df, tuple(inputs))
-    # timeme(pca_scikit)(df, tuple(inputs))
-    # timeme(linear_discriminant_analysis)(df, tuple(inputs))
-    # timeme(lda_scikit)(df, tuple(inputs))
-    # timeme(kfold_cross_validation)(df, tuple(inputs))
-    # timeme(learning_curves)(df, tuple(inputs))
-    # timeme(validation_curves)(df, tuple(inputs))
-    # timeme(grid_search_analysis)(df, tuple(inputs))
-    # timeme(precision_vs_recall)(df, tuple(inputs))
+    
     # timeme(majority_vote)(df, tuple(inputs))
     # timeme(bagging)(df, tuple(inputs))
     # timeme(adaboost)(df, tuple(inputs))
@@ -95,6 +92,22 @@ def feature_selection(df, inputs):
     
     # Random Forest Feature Selection - using a random forest to identify which factors decrease impurity the most
     timeme(random_forest_feature_importance)(df, tuple(inputs))
+
+
+def feature_extraction(df, inputs):
+    # Transforms the data - can be used to linearly separate data thru dimensionality reduction
+    timeme(principal_component_analysis)(df, tuple(inputs))
+    # timeme(pca_scikit)(df, tuple(inputs))
+    # timeme(linear_discriminant_analysis)(df, tuple(inputs))
+    # timeme(lda_scikit)(df, tuple(inputs))
+
+
+def model_evaluation(df, inputs):
+    timeme(kfold_cross_validation)(df, tuple(inputs))
+    # timeme(learning_curves)(df, tuple(inputs))
+    # timeme(validation_curves)(df, tuple(inputs))
+    # timeme(grid_search_analysis)(df, tuple(inputs))
+    # timeme(precision_vs_recall)(df, tuple(inputs))
     
 
 def separateTrainTest(df):
@@ -110,7 +123,7 @@ def selectInputs(df, inputs):
 
 
 def addTarget(df, tgt):
-    num_of_breaks = 3
+    num_of_breaks = 2
     df['target_proxy'] = df[tgt]
     df = df.dropna(subset = ['target_proxy'])
     df = df[df['target_proxy'] != 0]
@@ -152,7 +165,8 @@ def cleanData(df):
     
     # To filter out outliers
     # df = df[df['capExToSales'] < 10]
-    df = df[df['revenueGrowth'] < 10]
+    df = df[abs(df['revenueGrowth']) < 200]
+    df = df[abs(df['sharpeRatio']) < 10]
     
     # Temp for training purposes
     # df = df[abs(df['trailingPE']) < 30]

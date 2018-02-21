@@ -19,26 +19,24 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, make_scorer, roc_curve, auc, roc_auc_score, accuracy_score
-
 from utils.ml_utils import plot_decision_regions, standardize, IMG_PATH
 
+
 def kfold_cross_validation(df, xcols, folds=10):
+    pdb.set_trace()
     y = df['target']
     X = df[list(xcols)]
     
     # Standardize and split the training nad test data
     X_std = standardize(X)
     ts = 0.3
-    X_train, X_test, y_train, y_test = \
-          train_test_split(X_std, y, test_size=ts, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
     
     pipe_lr = Pipeline([('scl', StandardScaler()),
             ('pca', PCA(n_components=2)),
             ('clf', LogisticRegression(random_state=1))])
 
-    kfold = StratifiedKFold(y=y_train, 
-                            n_folds=folds,
-                            random_state=1)
+    kfold = StratifiedKFold(y=y_train, n_folds=folds, random_state=1)
     
     scores = []
     for k, (train, test) in enumerate(kfold):
@@ -48,11 +46,7 @@ def kfold_cross_validation(df, xcols, folds=10):
         print('Fold: %s, Class dist.: %s, Acc: %.3f' % (k+1, np.bincount(y_train.values[train]), score))
     print('\nCV accuracy: %.3f +/- %.3f' % (np.mean(scores), np.std(scores)))
 
-    scores = cross_val_score(estimator=pipe_lr, 
-                             X=X_train, 
-                             y=y_train.values, 
-                             cv=10,
-                             n_jobs=1)
+    scores = cross_val_score(estimator=pipe_lr, X=X_train, y=y_train.values, cv=10, n_jobs=1)
     print('CV accuracy scores: %s' % scores)
     print('CV accuracy: %.3f +/- %.3f' % (np.mean(scores), np.std(scores)))
     
