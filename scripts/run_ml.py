@@ -19,8 +19,8 @@ from scripts.continuous_variables import *
 def run(inputs):
     # Temp to make testing quicker
     t0 = time.time()
-    tickers = pd.read_csv('/home/ubuntu/workspace/ml_dev_work/utils/snp500_ticks.csv', header=None)
-    # tickers = pd.read_csv('/home/ubuntu/workspace/ml_dev_work/utils/dow_ticks.csv', header=None)
+    # tickers = pd.read_csv('/home/ubuntu/workspace/ml_dev_work/utils/snp500_ticks.csv', header=None)
+    tickers = pd.read_csv('/home/ubuntu/workspace/ml_dev_work/utils/dow_ticks.csv', header=None)
     with DBHelper() as db:
         db.connect()
         # df = db.select('morningstar', where = 'date in ("2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016")')
@@ -56,16 +56,20 @@ def run(inputs):
     # feature_extraction(df, inputs)
     
     # Algorithms
-    # timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
+    timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
     # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
     # timeme(support_vector_machines)(df, tuple(inputs), C=1)
     # timeme(nonlinear_svm)(df, tuple(inputs), C=1)
     # timeme(decision_tree)(df, tuple(inputs), md=4)
     # timeme(random_forest)(df, tuple(inputs), estimators=3)
     # timeme(adalinesgd)(df, tuple(inputs), estimators=3)
+    # timeme(adalinegd)(df, tuple(inputs), estimators=3)
+    # timeme(run_perceptron)(df, tuple(inputs), estimators=3)
+    # timeme(run_perceptron_multi)(df, tuple(inputs), estimators=3)
+    # timeme(adalinegdLearningExample)(df, tuple(inputs), estimators=3)
     
     # Model Evaluation
-    model_evaluation(df, inputs)
+    # model_evaluation(df, inputs)
     
     
     
@@ -158,15 +162,19 @@ def removeUnnecessaryColumns(df):
 
 def cleanData(df):
     # To filter out errant data
-    df = df[df['trailingPE'] != 0]
-    df = df[df['priceToBook'] > 0]
-    df = df[df['priceToSales'] != 0]
+    df = df[df['revenueGrowth'] != 0]
     df = df[df['3yrFwdReturn'] != 0]
+    df = df[df['trailingPE'] != 0]
+    # df = df[df['priceToBook'] > 0]
+    # df = df[df['priceToSales'] != 0]
+    
     
     # To filter out outliers
     # df = df[df['capExToSales'] < 10]
     df = df[abs(df['revenueGrowth']) < 200]
-    df = df[abs(df['sharpeRatio']) < 10]
+    df = df[df['trailingPE'] > 0]
+    # df = df[abs(df['sharpeRatio']) < 7]
+    # df = df[df['sharpeRatio'] > 0]
     
     # Temp for training purposes
     # df = df[abs(df['trailingPE']) < 30]
@@ -192,7 +200,11 @@ if __name__ == "__main__":
     #     'epsGrowth', 'revenueGrowth', 'pegRatio', 'sharpeRatio', 'sortinoRatio', 'volatility', 'beta', 'marketCorr',
     #     'treynorRatio'])
     
-    # K-means analysis, columns selected through extraction
+    # run(['trailingPE', 'priceToBook', 'priceToSales', 'divYield', 'debtToEquity', 'returnOnEquity', 'netIncomeMargin', 
+    #     'freeCashFlowPerShare', 'currentRatio', 'financialLeverage','capExToSales', 'priceToCashFlow',
+    #     'epsGrowth', 'revenueGrowth', 'pegRatio', 'sharpeRatio'])
+    
     # run(['returnOnEquity', 'divYield', 'marketCorr', 'revenueGrowth', 'sortinoRatio', 'sharpeRatio', 'capExToSales', 'currentRatio'])
-    run(['sharpeRatio', 'revenueGrowth'])
+    
+    run(['trailingPE', 'revenueGrowth'])
     

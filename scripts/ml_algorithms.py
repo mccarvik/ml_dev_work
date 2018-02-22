@@ -196,9 +196,11 @@ def logisticRegression(df, xcols, C=100, penalty='l1'):
     # Need xcols to be a tuple for the timeme method to work VERY HACKY
     y = df['target']
     X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
     X_std = standardize(X)
-    X_train, X_test, y_train, y_test = \
-          train_test_split(X_std, y, test_size=0.3, random_state=0)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
     
     # Normalization of the data --> max = 1, min=0, etc
     # mms = MinMaxScaler()
@@ -213,21 +215,24 @@ def logisticRegression(df, xcols, C=100, penalty='l1'):
     
     # Shows the percentage of falling into each class
     # Will need this later when we use on current data
-    print(lr.predict_proba(X_test[0:1]))
+    print("Class breakdowns: " + str(lr.predict_proba(X_test[0:1])))
     
     print('Training accuracy:', lr.score(X_train, y_train))
     print('Test accuracy:', lr.score(X_test, y_test))
-    print(lr.intercept_)
-    print(lr.coef_)
+    print("y-intercept:" + str(lr.intercept_))
+    print("coeffs:" + str(lr.coef_))
     
-    # plot_decision_regions(X_std, y_train.values, classifier=lr)
-    plt.title('Logistic Regression')
-    plt.xlabel(list(X.columns)[0])
-    plt.ylabel(list(X.columns)[1])
-    plt.legend(loc='upper left')
-    plt.tight_layout()
-    plt.savefig(IMG_PATH + 'log_reg_1.png', dpi=300)
-    plt.close()
+    try:
+        plot_decision_regions(X.values, y_train.values, classifier=lr)
+        plt.title('Logistic Regression')
+        plt.xlabel(list(X.columns)[0])
+        plt.ylabel(list(X.columns)[1])
+        plt.legend(loc='upper left')
+        plt.tight_layout()
+        plt.savefig(IMG_ROOT + 'dow/log_reg_1.png', dpi=300)
+        plt.close()
+    except Exception as e:
+        print("May have more than 2 variables")
 
 def support_vector_machines(df, xcols, C=100):
     y = df['target']
@@ -344,7 +349,7 @@ def k_nearest_neighbors(df, xcols, k=5):
     y = df['target']
     X = df[list(xcols)]
     
-    # Standardize and split the training nad test data
+    # Standardize and split the training and test data
     X_std = standardize(X)
     ts = 0.3
     X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
