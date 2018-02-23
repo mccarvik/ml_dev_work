@@ -192,7 +192,7 @@ def adalineGD(df, xcols, eta=0.1, n_iter=10):
     plt.savefig(IMG_PATH + 'adaline_3.png', dpi=300)
     plt.close()
     
-def logisticRegression(df, xcols, C=100, penalty='l1'):
+def logisticRegression(df, xcols, C=100, penalty='l2'):
     # Need xcols to be a tuple for the timeme method to work VERY HACKY
     y = df['target']
     X = df[list(xcols)]
@@ -207,16 +207,14 @@ def logisticRegression(df, xcols, C=100, penalty='l1'):
     # X_train_norm = mms.fit_transform(X_train)
     # X_test_norm = mms.transform(X_test)
     
-    # C is the regularization parameter, (C = 1/lambda) --> The larger lambda is, 
-    # the more regularized the weights are, the less susceptible the regression is 
-    # to overfitting aka the smaller C is, the more regularized
+    # C: regularization parameter, (C = 1/lambda)
+    # smaller C = more regulatiazion, smaller wieghts,  higher C = less regularization, lareger weights   
+    # penalty: type of regulatizaion function used for weight shrinkage / decay to prevent overfitting
     lr = LogisticRegression(C=C, random_state=0, penalty=penalty)
     lr.fit(X_train, y_train)
     
     # Shows the percentage of falling into each class
-    # Will need this later when we use on current data
     print("Class breakdowns: " + str(lr.predict_proba(X_test[0:1])))
-    
     print('Training accuracy:', lr.score(X_train, y_train))
     print('Test accuracy:', lr.score(X_test, y_test))
     print("y-intercept:" + str(lr.intercept_))
