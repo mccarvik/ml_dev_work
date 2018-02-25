@@ -44,8 +44,8 @@ def run_perceptron(df, xcols, eta=0.1, n_iter=10):
     y = df['target']
     X = df[list(xcols)]
     
-    buy = df[df['target'] > 0][list(X.columns)].values
-    sell = df[df['target'] < 0][list(X.columns)].values
+    buy = df[df['target'] > 0.5][list(X.columns)].values
+    sell = df[df['target'] < 0.5][list(X.columns)].values
     plt.figure(figsize=(7,4))
     plt.scatter(buy[:, 0], buy[:, 1], color='blue', marker='x', label='Buy')
     plt.scatter(sell[:, 0], sell[:, 1], color='red', marker='s', label='Sell')
@@ -54,17 +54,15 @@ def run_perceptron(df, xcols, eta=0.1, n_iter=10):
     plt.legend()
     ppn = Perceptron(eta, n_iter)
     ppn.fit(X.values, y.values)
-    # pdb.set_trace()
+    pdb.set_trace()
     plot_decision_regions(X.values, y.values, classifier=ppn)
-    plt.savefig(IMG_PATH + "scatter.png")
+    plt.savefig(IMG_ROOT + "dow/perceptron.png")
     plt.close()
-    
-    # print('Accuracy: %.2f' % accuracy_score(y_test, y_pred))
     
     plt.plot(range(1,len(ppn.errors_) + 1), ppn.errors_,marker='o')
     plt.xlabel('Iterations')
     plt.ylabel('Number of misclassifications')
-    plt.savefig(IMG_PATH + "misclassifications.png")
+    plt.savefig(IMG_ROOT + "dow/perceptron_misses.png")
     plt.close()
     
     t1 = time.time()
