@@ -41,21 +41,25 @@ def run_perceptron(df, xcols, eta=0.1, n_iter=10):
         NONE
     '''
     t0 = time.time()
-    y = df['target']
+    # Need this replace to comply with the -1 and 1 of the perceptron binary classifier
+    y = df['target'].replace(0, -1)
     X = df[list(xcols)]
     
-    buy = df[df['target'] > 0.5][list(X.columns)].values
-    sell = df[df['target'] < 0.5][list(X.columns)].values
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
+    
     plt.figure(figsize=(7,4))
-    plt.scatter(buy[:, 0], buy[:, 1], color='blue', marker='x', label='Buy')
-    plt.scatter(sell[:, 0], sell[:, 1], color='red', marker='s', label='Sell')
-    plt.xlabel(list(X.columns)[0])
-    plt.ylabel(list(X.columns)[1])
     plt.legend()
     ppn = Perceptron(eta, n_iter)
-    ppn.fit(X.values, y.values)
+    ppn.fit(X_train, y_train.values)
+    
     pdb.set_trace()
-    plot_decision_regions(X.values, y.values, classifier=ppn)
+    print('Training accuracy:', ppn.score(X_train, y_train))
+    print('Test accuracy:', ppn.score(X_test, y_test))
+    
+    plot_decision_regions(X_train, y_train.values, classifier=ppn)
     plt.savefig(IMG_ROOT + "dow/perceptron.png")
     plt.close()
     
@@ -66,7 +70,6 @@ def run_perceptron(df, xcols, eta=0.1, n_iter=10):
     plt.close()
     
     t1 = time.time()
-    app.logger.info("Done training data and creating charts, took {0} seconds".format(t1-t0))
     print("Done training data and creating charts, took {0} seconds".format(t1-t0))
     
 def run_perceptron_multi(df, xcols, eta=0.1, n_iter=15):
@@ -219,7 +222,7 @@ def logisticRegression(df, xcols, C=100, penalty='l2'):
     print("coeffs:" + str(lr.coef_))
     
     try:
-        plot_decision_regions(X.values, y_train.values, classifier=lr)
+        plot_decision_regions(X_train.values, y_train.values, classifier=lr)
         plt.title('Logistic Regression')
         plt.xlabel(list(X.columns)[0])
         plt.ylabel(list(X.columns)[1])

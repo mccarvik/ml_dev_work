@@ -74,3 +74,11 @@ class Perceptron(object):
         """Return class label after unit step"""
         # binary classifier
         return np.where(self.net_input(X) >= 0.0, 1, -1)
+    
+    def score(self, X, y):
+        # Returns the accuracy score of the perceptron
+        wrong = 0
+        for i, j in zip(X, y):
+            if j != self.predict(i):
+                wrong += 1
+        return (len(y) - wrong) / len(y)
