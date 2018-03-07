@@ -53,6 +53,7 @@ class AdalineGD(object):
             output = self.net_input(X)
             # errors will accumulate even if in the correct direction, ex:
             # y = 1, output=2.1, err=-1.1 even though would have predicted correct class, helps get to exact output, not just correct prediction
+            # Different than perceptron
             errors = (y - output)
             temp = tuple(self.w_)
             # Updates weights based on how far off prediciton is, unlike perceptron
