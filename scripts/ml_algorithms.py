@@ -166,6 +166,7 @@ def adalineSGD(df, xcols, eta=0.1, n_iter=10):
     plt.close()
 
 def adalineGD(df, xcols, eta=0.1, n_iter=10):
+    pdb.set_trace()
     y = df['target']
     X = df[list(xcols)]
     

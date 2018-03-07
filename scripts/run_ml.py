@@ -56,7 +56,8 @@ def run(inputs):
     # feature_extraction(df, inputs)
     
     # Algorithms
-    timeme(run_perceptron)(df, tuple(inputs))
+    # timeme(run_perceptron)(df, tuple(inputs))
+    timeme(adalinegd)(df, tuple(inputs))
     # timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
     # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
     # timeme(support_vector_machines)(df, tuple(inputs), C=1)
@@ -64,9 +65,7 @@ def run(inputs):
     # timeme(decision_tree)(df, tuple(inputs), md=4)
     # timeme(random_forest)(df, tuple(inputs), estimators=3)
     # timeme(adalinesgd)(df, tuple(inputs), estimators=3)
-    # timeme(adalinegd)(df, tuple(inputs), estimators=3)
     # timeme(run_perceptron_multi)(df, tuple(inputs), estimators=3)
-    # timeme(adalinegdLearningExample)(df, tuple(inputs), estimators=3)
     
     # Model Evaluation
     # model_evaluation(df, inputs)
