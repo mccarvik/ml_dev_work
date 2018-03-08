@@ -134,19 +134,18 @@ def adalinegdLearningExample(df, xcols, eta=0.1, n_iter=10):
     # plt.show()
     
 def adalineSGD(df, xcols, eta=0.1, n_iter=10):
-    y = df['target']
+    t0 = time.time()
+    # Need this replace to comply with the -1 and 1 of the perceptron binary classifier
+    y = df['target'].replace(0, -1)
     X = df[list(xcols)]
     
-    # standardize features
-    X_std = np.copy(X.values)
-    # X_std[:,0] = (X.values[:,0] - X.values[:,0].mean()) / X.values[:,0].std()
-    # X_std[:,1] = (X.values[:,1] - X.values[:,1].mean()) / X.values[:,1].std()
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
     
-    ada = AdalineSGD(n_iter=15, eta=0.001, random_state=1)
-    # pdb.set_trace()
-    ada.fit(X_std, y.values)
-    # pdb.set_trace()
-    # ada.partial_fit(X_std, y.values)
+    ada = AdalineSGD(n_iter=15, eta=0.001)
+    ada.fit(X_std, y)
     
     plot_decision_regions(X_std, y.values, classifier=ada)
     plt.title('Adaline - Gradient Descent')
@@ -154,14 +153,14 @@ def adalineSGD(df, xcols, eta=0.1, n_iter=10):
     plt.ylabel(list(X.columns)[1])
     plt.legend(loc='upper left')
     plt.tight_layout()
-    plt.savefig(IMG_PATH + 'adalinesgd.png', dpi=300)
+    plt.savefig(IMG_ROOT + 'dow/adalinesgd.png', dpi=300)
     plt.close()
     
     plt.plot(range(1, len(ada.cost_) + 1), ada.cost_, marker='o')
     plt.xlabel('Epochs')
     plt.ylabel('Sum-squared-error')
     plt.tight_layout()
-    plt.savefig(IMG_PATH + 'adalinesgd_gd.png', dpi=300)
+    plt.savefig(IMG_ROOT + 'dow/adalinesgd_gd.png', dpi=300)
     plt.close()
 
 def adalineGD(df, xcols, eta=0.1, n_iter=10):

@@ -59,13 +59,14 @@ class AdalineSGD(object):
         """
         self._initialize_weights(X.shape[1])
         self.cost_ = []
-        # pdb.set_trace()
         for i in range(self.n_iter):
+            # data needs to be presented in random order
             if self.shuffle:
                 X, y = self._shuffle(X, y)
             cost = []
             for xi, target in zip(X, y):
-                # update weights "on-the-fly" after each sample unlike gradient descent
+                # update weights "on-the-fly" after each sample unlike regular adaline gradient descent
+                # Other than that, very similar to adalineGD
                 cost.append(self._update_weights(xi, target))
             avg_cost = sum(cost)/len(y)
             self.cost_.append(avg_cost)
@@ -73,6 +74,7 @@ class AdalineSGD(object):
 
     def partial_fit(self, X, y):
         """Fit training data without reinitializing the weights"""
+        # This can be used to continue learning on a model after weights have already been tuned to some extent
         if not self.w_initialized:
             self._initialize_weights(X.shape[1])
         if y.ravel().shape[0] > 1:
@@ -96,6 +98,7 @@ class AdalineSGD(object):
         """Apply Adaline learning rule to update the weights"""
         output = self.net_input(xi)
         error = (target - output)
+        # Same as adalineGD where the weights are updated even if prediction is right
         self.w_[1:] += self.eta * xi.dot(error)
         self.w_[0] += self.eta * error
         cost = 0.5 * error**2

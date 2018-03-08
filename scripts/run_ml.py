@@ -57,7 +57,8 @@ def run(inputs):
     
     # Algorithms
     # timeme(run_perceptron)(df, tuple(inputs))
-    timeme(adalineGD)(df, tuple(inputs))
+    # timeme(adalineGD)(df, tuple(inputs))
+    timeme(adalineSGD)(df, tuple(inputs))
     # timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
     # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
     # timeme(support_vector_machines)(df, tuple(inputs), C=1)

@@ -110,7 +110,5 @@ def main2():
     plt.close()
 
 if __name__ == "__main__":
-    # import pdb; pdb.set_trace()
-    # main1()
     main2()
     
