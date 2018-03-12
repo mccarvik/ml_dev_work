@@ -40,7 +40,7 @@ def run(inputs):
     # clean data
     df = removeUnnecessaryColumns(df)
     df = cleanData(df)
-    df = addTarget(df, '3yrFwdReturn')
+    df = addTarget(df, '3yrFwdReturn', breaks=3)
     df = df.set_index(['ticker', 'date'])
     df = selectInputs(df, inputs)
     # drop all rows with NA's
@@ -58,8 +58,10 @@ def run(inputs):
     # Algorithms
     # timeme(run_perceptron)(df, tuple(inputs))
     # timeme(adalineGD)(df, tuple(inputs))
-    timeme(adalineSGD)(df, tuple(inputs))
-    # timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
+    # timeme(adalineSGD)(df, tuple(inputs))
+    # timeme(run_perceptron_multi)(df, tuple(inputs))
+    timeme(logisticRegression)(df, tuple(inputs), C=1000, penalty='l1')
+    
     # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
     # timeme(support_vector_machines)(df, tuple(inputs), C=1)
     # timeme(nonlinear_svm)(df, tuple(inputs), C=1)
@@ -67,6 +69,7 @@ def run(inputs):
     # timeme(random_forest)(df, tuple(inputs), estimators=3)
     # timeme(adalinesgd)(df, tuple(inputs), estimators=3)
     # timeme(run_perceptron_multi)(df, tuple(inputs), estimators=3)
+    
     
     # Model Evaluation
     # model_evaluation(df, inputs)
@@ -126,8 +129,8 @@ def selectInputs(df, inputs):
     return df
 
 
-def addTarget(df, tgt):
-    num_of_breaks = 2
+def addTarget(df, tgt, breaks=2):
+    num_of_breaks = breaks
     df['target_proxy'] = df[tgt]
     df = df.dropna(subset = ['target_proxy'])
     df = df[df['target_proxy'] != 0]

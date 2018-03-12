@@ -77,32 +77,33 @@ def run_perceptron_multi(df, xcols, eta=0.1, n_iter=15):
     X = df[list(xcols)]
     
     # Split up the training and test data and standardize inputs
-    X_train, X_test, y_train, y_test = \
-          train_test_split(X, y, test_size=0.3, random_state=0)
-    X_train_std, X_test_std = standardize(X_train, X_test)
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
 
     # pdb.set_trace()
-    strong_buy = df[df['target'] == 3][list(X.columns)].values
-    buy = df[df['target'] == 2][list(X.columns)].values
-    sell = df[df['target'] == 1][list(X.columns)].values
-    strong_sell = df[df['target'] == 0][list(X.columns)].values
+    # strong_buy = df[df['target'] == 3][list(X.columns)].values
+    # buy = df[df['target'] == 2][list(X.columns)].values
+    # sell = df[df['target'] == 1][list(X.columns)].values
+    # strong_sell = df[df['target'] == 0][list(X.columns)].values
     
-    plt.figure(figsize=(7,4))
-    plt.scatter(buy[:, 0], buy[:, 1], color='blue', marker='x', label='Buy')
-    plt.scatter(sell[:, 0], sell[:, 1], color='red', marker='s', label='Sell')
-    plt.scatter(strong_buy[:, 0], strong_buy[:, 1], color='blue', marker='*', label='Strong Buy')
-    plt.scatter(strong_sell[:, 0], strong_sell[:, 1], color='red', marker='^', label='Strong Sell')
-    plt.xlabel(list(X.columns)[0])
-    plt.ylabel(list(X.columns)[1])
-    plt.legend()
+    # plt.figure(figsize=(7,4))
+    # plt.scatter(buy[:, 0], buy[:, 1], color='blue', marker='x', label='Buy')
+    # plt.scatter(sell[:, 0], sell[:, 1], color='red', marker='s', label='Sell')
+    # plt.scatter(strong_buy[:, 0], strong_buy[:, 1], color='blue', marker='*', label='Strong Buy')
+    # plt.scatter(strong_sell[:, 0], strong_sell[:, 1], color='red', marker='^', label='Strong Sell')
+    # plt.xlabel(list(X.columns)[0])
+    # plt.ylabel(list(X.columns)[1])
+    # plt.legend()
     
     ppn = perceptron_skl(n_iter=40, eta0=0.1, random_state=0)
-    ppn.fit(X_train_std, y_train)
-    y_pred = ppn.predict(X_test_std)
+    ppn.fit(X_train, y_train)
+    y_pred = ppn.predict(X_test)
 
     print('Accuracy: %.2f' % accuracy_score(y_test, y_pred))
-    plot_decision_regions(X.values, y.values, classifier=ppn)
-    plt.savefig(IMG_PATH + "scatter.png")
+    plot_decision_regions(X_train, y_train.values, classifier=ppn)
+    plt.savefig(IMG_ROOT + "dow/perceptron_multi.png")
     plt.close()
     
     t1 = time.time()
@@ -214,6 +215,7 @@ def logisticRegression(df, xcols, C=100, penalty='l2'):
     lr = LogisticRegression(C=C, random_state=0, penalty=penalty)
     lr.fit(X_train, y_train)
     
+    pdb.set_trace()
     # Shows the percentage of falling into each class
     print("Class breakdowns: " + str(lr.predict_proba(X_test[0:1])))
     print('Training accuracy:', lr.score(X_train, y_train))
@@ -222,7 +224,7 @@ def logisticRegression(df, xcols, C=100, penalty='l2'):
     print("coeffs:" + str(lr.coef_))
     
     try:
-        plot_decision_regions(X_train.values, y_train.values, classifier=lr)
+        plot_decision_regions(X_train, y_train.values, classifier=lr)
         plt.title('Logistic Regression')
         plt.xlabel(list(X.columns)[0])
         plt.ylabel(list(X.columns)[1])
