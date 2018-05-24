@@ -215,7 +215,6 @@ def logisticRegression(df, xcols, C=100, penalty='l2'):
     lr = LogisticRegression(C=C, random_state=0, penalty=penalty)
     lr.fit(X_train, y_train)
     
-    pdb.set_trace()
     # Shows the percentage of falling into each class
     print("Class breakdowns: " + str(lr.predict_proba(X_test[0:1])))
     print('Training accuracy:', lr.score(X_train, y_train))
@@ -234,6 +233,8 @@ def logisticRegression(df, xcols, C=100, penalty='l2'):
         plt.close()
     except Exception as e:
         print("May have more than 2 variables")
+    
+    return lr
 
 def support_vector_machines(df, xcols, C=100):
     y = df['target']
@@ -242,8 +243,7 @@ def support_vector_machines(df, xcols, C=100):
     # Standardize and split the training nad test data
     X_std = standardize(X)
     ts = 0.3
-    X_train, X_test, y_train, y_test = \
-          train_test_split(X_std, y, test_size=ts, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
     
     svm = SVC(kernel='linear', C=C, random_state=0)
     svm.fit(X_train, y_train)
@@ -260,6 +260,7 @@ def support_vector_machines(df, xcols, C=100):
     plt.tight_layout()
     plt.savefig(IMG_PATH + 'svm_C' + str(C) + '.png', dpi=300)
     plt.close()
+    return svm
     
 def nonlinear_svm(df, xcols, C=100, gamma=0.10):
     y = df['target']

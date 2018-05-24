@@ -53,6 +53,7 @@ def sbs_run(df, xcols, k_feats=1, est=KNeighborsClassifier(n_neighbors=3), test=
     plt.grid()
     plt.tight_layout()
     plt.savefig(IMG_ROOT + 'snp/sbs.png', dpi=300)
+    plt.close()
     
     
     k5 = list(sbs.subsets_[-1])
@@ -91,9 +92,53 @@ def random_forest_feature_importance(df, xcols):
     plt.xlim([-1, X_train.shape[1]])
     plt.tight_layout()
     plt.savefig(IMG_ROOT + 'snp/random_forest_feat.png', dpi=300)
+    plt.close()
     
     X_selected = forest.transform(X_train, threshold=0.05)
     print(X_selected.shape)
+    
+    # Shows the percentage of falling into each class
+    print("Class breakdowns: " + str(forest.predict_proba(X_test[0:1])))
+    print('Training accuracy:', forest.score(X_train, y_train))
+    print('Test accuracy:', forest.score(X_test, y_test))
+
+
+def logistic_regression_feature_importance(df, xcols, C=100, penalty='l2'):
+    y = df['target']
+    X = df[list(xcols)]
+    
+    # Standardize and split the training nad test data
+    X_std = standardize(X)
+    ts = 0.3
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
+    
+    feat_labels = df[list(xcols)].columns
+    lr = LogisticRegression(C=C, random_state=0, penalty=penalty)
+    lr.fit(X_train, y_train)
+    importances = lr.coef_[0]
+    indices = np.argsort(abs(importances))[::-1]
+    
+    for f in range(X_train.shape[1]):
+        print("%2d) %-*s %f" % (f + 1, 30, feat_labels[indices[f]], importances[indices[f]]))
+    
+    plt.title('Feature Importances')
+    plt.bar(range(X_train.shape[1]), importances[indices],color='lightblue', align='center')
+  
+    plt.xticks(range(X_train.shape[1]), feat_labels[indices], rotation=90)
+    plt.xlim([-1, X_train.shape[1]])
+    plt.tight_layout()
+    plt.savefig(IMG_ROOT + 'snp/logistic_regression_feat.png', dpi=300)
+    plt.close()
+    
+    X_selected = lr.transform(X_train, threshold=0.05)
+    print(X_selected.shape)
+    
+    # Shows the percentage of falling into each class
+    print("Class breakdowns: " + str(lr.predict_proba(X_test[0:1])))
+    print('Training accuracy:', lr.score(X_train, y_train))
+    print('Test accuracy:', lr.score(X_test, y_test))
+    print("y-intercept:" + str(lr.intercept_))
+    print("coeffs:" + str(lr.coef_))
 
     
 def principal_component_analysis(df, xcols):

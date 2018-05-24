@@ -377,6 +377,6 @@ def sendToDB(df):
 
 
 if __name__ == "__main__":
-    # getData(['YUM'])
+    getData(['YUM'])
     # getData(['ATVI'])
-    getData()
+    # getData()

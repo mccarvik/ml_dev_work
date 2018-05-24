@@ -12,7 +12,6 @@ from itertools import combinations
 class SBS():
     def __init__(self, estimator, k_features, scoring=accuracy_score, test_size=0.25, random_state=1):
       self.scoring = scoring
-      pdb.set_trace()
       # self.estimator = clone(estimator)
       self.estimator = estimator
       self.k_features = k_features
