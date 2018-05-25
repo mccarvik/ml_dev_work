@@ -347,7 +347,6 @@ def random_forest(df, xcols, estimators=5):
     plt.close()
     
 def k_nearest_neighbors(df, xcols, k=5):
-    pdb.set_trace()
     y = df['target']
     X = df[list(xcols)]
     
@@ -370,3 +369,5 @@ def k_nearest_neighbors(df, xcols, k=5):
     plt.tight_layout()
     plt.savefig(IMG_ROOT + 'snp/kmeans/kkn.png', dpi=300)
     plt.close()
+    
+    return knn

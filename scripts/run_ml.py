@@ -42,7 +42,7 @@ def run(inputs):
     # clean data
     df = removeUnnecessaryColumns(df)
     df = cleanData(df)
-    df = addTarget(df, '5yrFwdReturn', breaks=2)
+    df = addTarget(df, '5yrFwdReturn', breaks=2, custom_breaks=[33, 67])
     df = df.set_index(['ticker', 'date'])
     df = selectInputs(df, inputs)
     # drop all rows with NA's
@@ -62,10 +62,10 @@ def run(inputs):
     # timeme(adalineGD)(df, tuple(inputs))
     # timeme(adalineSGD)(df, tuple(inputs))
     # timeme(run_perceptron_multi)(df, tuple(inputs))
-    model = timeme(logisticRegression)(df, tuple(inputs), C=100, penalty='l1')
+    # model = timeme(logisticRegression)(df, tuple(inputs), C=100, penalty='l2')
     
-    # timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
-    # svm = timeme(support_vector_machines)(df, tuple(inputs), C=100)
+    model = timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
+    # model = timeme(support_vector_machines)(df, tuple(inputs), C=100)
     # timeme(nonlinear_svm)(df, tuple(inputs), C=1)
     # timeme(decision_tree)(df, tuple(inputs), md=4)
     # timeme(random_forest)(df, tuple(inputs), estimators=3)
@@ -87,10 +87,13 @@ def run(inputs):
     # timeme(random_forest_regression)(df, tuple(inputs))
     
     # test on recent data
-    evalOnCurrentCompanies(model, filtered_cur_df, inputs)
+    preds = evalOnCurrentCompanies(model, filtered_cur_df, inputs)
+    pdb.set_trace()
+    print()
 
 
 def evalOnCurrentCompanies(model, df, inputs):
+    pdb.set_trace()
     df_ind = df[['ticker', 'date', 'month']]
     df_trimmed = pd.DataFrame(standardize(df[inputs]), columns=inputs)
     df_combine = pd.concat([df_ind.reset_index(drop=True), df_trimmed], axis=1)
@@ -103,6 +106,8 @@ def evalOnCurrentCompanies(model, df, inputs):
         except:
             predictions[pred] = [row['ticker']]
         print("    Class Prediction: " + str(pred))
+    
+    return predictions
 
 
 def feature_selection(df, inputs):
@@ -151,24 +156,20 @@ def selectInputs(df, inputs):
     return df
 
 
-def addTarget(df, tgt, breaks=2):
+def addTarget(df, tgt, breaks=2, custom_breaks=None):
     num_of_breaks = breaks
     df['target_proxy'] = df[tgt]
     df = df.dropna(subset = ['target_proxy'])
     df = df[df['target_proxy'] != 0]
     
-    break_arr = np.linspace(0, 100, num_of_breaks+1)[1:-1]
+    if not custom_breaks:
+        break_arr = np.linspace(0, 100, num_of_breaks+1)[1:-1]
+    else:
+        break_arr = custom_breaks
     breaks = np.percentile(df['target_proxy'], break_arr)
     # breaks = np.percentile(df['target_proxy'], [50])
     df['target'] = df.apply(lambda x: targetToCatMulti(x['target_proxy'], breaks), axis=1)
     return df
-
-
-def targetToCat(x, median):
-    if (x > median):
-        return 1
-    else:
-        return -1
 
 
 def targetToCatMulti(x, breaks):
@@ -188,7 +189,8 @@ def removeUnnecessaryColumns(df):
 def filterLive(df):
     df = df[df['trailingPE'] < 30]
     df = df[df['trailingPE'] > 0]
-    df = df[abs(df['priceToBook']) < 10]
+    df = df[df['priceToBook'] < 4]
+    df = df[df['priceToSales'] < 2]
     df = df[df['capExToSales'] < 20]
     return df
 
