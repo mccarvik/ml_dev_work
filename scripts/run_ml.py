@@ -8,6 +8,7 @@ import numpy as np
 from utils.helper_funcs import timeme
 from utils.data_utils import *
 from utils.db_utils import DBHelper
+from utils.ml_utils import standardize
 
 from scripts.ml_algorithms import *
 from scripts.model_evaluation import *
@@ -86,11 +87,22 @@ def run(inputs):
     # timeme(random_forest_regression)(df, tuple(inputs))
     
     # test on recent data
-    evalOnCurrentCompanies(model, filtered_cur_df)
+    evalOnCurrentCompanies(model, filtered_cur_df, inputs)
 
-def evalOnCurrentCompanies(model, df):
-    pdb.set_trace()
-    model.predict(df)
+
+def evalOnCurrentCompanies(model, df, inputs):
+    df_ind = df[['ticker', 'date', 'month']]
+    df_trimmed = pd.DataFrame(standardize(df[inputs]), columns=inputs)
+    df_combine = pd.concat([df_ind.reset_index(drop=True), df_trimmed], axis=1)
+    predictions = {}
+    for ix, row in df_combine.iterrows():
+        print(row['ticker'] + "   " + row['date'] + "   " + str(row['month']), end="")
+        pred = model.predict(row[inputs])[0]
+        try:
+            predictions[pred].append(row['ticker'])
+        except:
+            predictions[pred] = [row['ticker']]
+        print("    Class Prediction: " + str(pred))
 
 
 def feature_selection(df, inputs):

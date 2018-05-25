@@ -15,6 +15,7 @@ def update_check(list1, list2):
         if i != j:
             return True
     return False
+
     
 def plot_decision_regions(X, y, classifier, test_break_idx=None, resolution=0.02):
    # setup marker generator and color map
@@ -49,6 +50,7 @@ def plot_decision_regions(X, y, classifier, test_break_idx=None, resolution=0.02
                    marker='o',
                    s=55, label='test set')
 
+
 def standardize(X_train, X_test=None):
     # Standardization of the data --> everything based on std's from the mean
     sc = StandardScaler()
@@ -60,15 +62,19 @@ def standardize(X_train, X_test=None):
     else:
         return X_train_std
 
+
 # Decision Tree criterion funcs
 def gini(p):
     return (p)*(1 - (p)) + (1-p)*(1 - (1-p))
+
   
 def entropy(p):
     return - p*np.log2(p) - (1 - p)*np.log2((1 - p))
+
   
 def error(p):
     return 1 - np.max([p, 1 - p])
+
 
 def lin_regplot(X, y, model):
     plt.scatter(X, y, c='lightblue')
