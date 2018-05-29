@@ -1,4 +1,4 @@
-import sys
+import sys, time
 sys.path.append("/home/ubuntu/workspace/ml_dev_work")
 sys.path.append("/usr/local/lib/python2.7/dist-packages")
 sys.path.append("/usr/local/lib/python3.4/dist-packages")
@@ -80,6 +80,10 @@ def makeAPICall(tick):
     try:
         url = 'http://financials.morningstar.com/ajax/exportKR2CSV.html?t=' + tick
         urlData = requests.get(url).content.decode('utf-8')
+        if urlData == '':
+            # try one more time
+            time.sleep(5)
+            urlData = requests.get(url).content.decode('utf-8')
         cr = csv.reader(urlData.splitlines(), delimiter=',')
         data = []
         for row in list(cr):
@@ -98,8 +102,9 @@ def makeAPICall(tick):
     except:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         # Chance Company Not published on Morningstar
-        print("Error in API Call for {3}  {0}, {1}, {2}".format(exc_type, exc_tb.tb_lineno, exc_obj, tick))
+        print("Error in API Call, probably no Morningstar data, for {3}  {0}, {1}, {2}".format(exc_type, exc_tb.tb_lineno, exc_obj, tick))
         raise
+        
     print("Succeeded " + tick + "\t")
     success.append(tick)
 
@@ -164,19 +169,18 @@ def addCustomColumns(df, market_upd=False):
         print("Could not read time series data for {3}: {0}, {1}, {2}".format(exc_type, exc_tb.tb_lineno, exc_obj, df.index.get_level_values('ticker')[0]))
         raise
         
-    
     try:
         df = addBasicCustomCols(df, qr)
         df = addGrowthCustomCols(df, qr)
         df = addTimelineCustomCols(df, qr)
     except Exception as e:
-        pdb.set_trace()
+        # pdb.set_trace()
         exc_type, exc_obj, exc_tb = sys.exc_info()
         print("Issue adding columns {3}: {0}, {1}, {2}".format(exc_type, exc_tb.tb_lineno, exc_obj, df.index.get_level_values('ticker')[0]))
         raise
     
     if market_upd:
-        # market = DataReader(".INX", 'google', start, end, pause=1)['Close']
+        market = DataReader(".INX", 'google', start, end, pause=1)['Close']
         market = DataReader('^GSPC','yahoo', start, end,pause=1)['Close']
         market.to_csv('/home/ubuntu/workspace/finance/app/static/docs/market.csv')
         quotes = pd.DataFrame(quotes)
@@ -294,12 +298,12 @@ def addBasicCustomCols(df, qr):
     df['priceToBook'] = df['currentPrice'] / df['bookValuePerShare']
     df['priceToSales'] = df['currentPrice'] / df['revenuePerShare']
     df['priceToCashFlow'] = df['currentPrice'] / df['freeCashFlowPerShare']
-    df['grossProfit'] = (1-df['cogs']) * df['revenue']
+    df['grossProfit'] = (df['grossMargin']/100) * df['revenue']
     df['marketCapital'] = df['shares'] * df['currentPrice']
     df['totalAssets'] = df['bookValuePerShare'] / df['totalEquity']
     df['enterpriseValue'] = df['marketCapital'] + (df['totalLiabilities'] * df['totalAssets']) - (df['cashAndShortTermInv'] * df['totalAssets'])
     df['enterpriseToRevenue'] = df['enterpriseValue'] / df['revenue']
-    df['EBT'] = (df['operatingIncome'] - df['netInterestOtherMargin']) * df['totalAssets']
+    df['EBT'] = (df['operatingIncome'] - (df['netInterestOtherMargin']/100 * df['revenue']))    # aka Pretax Income
     return df
 
     
@@ -377,6 +381,6 @@ def sendToDB(df):
 
 
 if __name__ == "__main__":
-    getData(['YUM'])
-    # getData(['ATVI'])
-    # getData()
+    # getData(['MCD'])
+    # getData(['ALK'])
+    getData()
