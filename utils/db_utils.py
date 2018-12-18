@@ -105,7 +105,6 @@ class DBHelper:
             print("DB INSERT INTO ERROR: {0}, {1}, {2}".format(exc_type, exc_tb.tb_lineno, exc_obj))
             # app.logger.info("DB INSERT INTO ERROR: {0}, {1}, {2}".format(exc_type, exc_tb.tb_lineno, exc_obj))
             return {'status': 500}
-            
     
     def upsert(self, table, cols_vals, prim_keys):
         # first try an insert

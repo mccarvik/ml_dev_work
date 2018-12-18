@@ -42,7 +42,7 @@ def run(inputs):
     # clean data
     df = removeUnnecessaryColumns(df)
     df = cleanData(df)
-    df = addTarget(df, '5yrFwdReturn', breaks=2, custom_breaks=[33, 67])
+    df = addTarget(df, '5yrFwdReturn', breaks=1, custom_breaks=[33, 67])
     df = df.set_index(['ticker', 'date'])
     df = selectInputs(df, inputs)
     # drop all rows with NA's
@@ -64,11 +64,11 @@ def run(inputs):
     # timeme(run_perceptron_multi)(df, tuple(inputs))
     # model = timeme(logisticRegression)(df, tuple(inputs), C=100, penalty='l2')
     
-    model = timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
+    # model = timeme(k_nearest_neighbors)(df, tuple(inputs), k=8)
+    model = timeme(random_forest)(df, tuple(inputs), estimators=3)
     # model = timeme(support_vector_machines)(df, tuple(inputs), C=100)
     # timeme(nonlinear_svm)(df, tuple(inputs), C=1)
     # timeme(decision_tree)(df, tuple(inputs), md=4)
-    # timeme(random_forest)(df, tuple(inputs), estimators=3)
     # timeme(adalinesgd)(df, tuple(inputs), estimators=3)
     # timeme(run_perceptron_multi)(df, tuple(inputs), estimators=3)
     
@@ -229,15 +229,15 @@ def cleanData(df):
 
 if __name__ == "__main__":
     # Most Relevant columns
-    # run(['trailingPE', 'priceToBook', 'priceToSales', 'divYield', 'debtToEquity', 'returnOnEquity', 'netIncomeMargin', 
-    #     'freeCashFlowPerShare', 'currentRatio', 'quickRatio','financialLeverage','capExToSales', 'priceToCashFlow',
-    #     'epsGrowth', 'revenueGrowth', 'pegRatio', 'sharpeRatio', 'sortinoRatio', 'volatility', 'beta', 'marketCorr',
-    #     'treynorRatio'])
+    run(['trailingPE', 'priceToBook', 'priceToSales', 'divYield', 'debtToEquity', 'returnOnEquity', 'netIncomeMargin', 
+        'freeCashFlowPerShare', 'currentRatio', 'quickRatio','financialLeverage','capExToSales', 'priceToCashFlow',
+        'epsGrowth', 'revenueGrowth', 'pegRatio', 'sharpeRatio', 'sortinoRatio', 'volatility', 'beta', 'marketCorr',
+        'treynorRatio'])
     
     # run(['trailingPE', 'priceToBook', 'priceToSales', 'debtToEquity', 'returnOnEquity', 'netIncomeMargin', 
     #     'freeCashFlowPerShare', 'capExToSales', 'priceToCashFlow', 'revenueGrowth'])
     
     # run(['returnOnEquity', 'divYield', 'marketCorr', 'revenueGrowth', 'sortinoRatio', 'sharpeRatio', 'capExToSales', 'currentRatio'])
     
-    run(['priceToBook', 'priceToSales'])
+    # run(['priceToBook', 'priceToSales'])
     

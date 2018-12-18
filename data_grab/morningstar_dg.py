@@ -60,12 +60,14 @@ def getData(tickers=None):
                 makeAPICall(t)
                 success.append(t)
             except:
+                # pdb.set_trace()
                 failure.append(t)
                 print("Failed " + t + "\t")
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 print("Error in task loop: {0}, {1}, {2}".format(exc_type, exc_tb.tb_lineno, exc_obj))
             ct+=1
     except Exception as e:
+        # pdb.set_trace()
         exc_type, exc_obj, exc_tb = sys.exc_info()
         print("Error in getData: {0}, {1}, {2}".format(exc_type, exc_tb.tb_lineno, exc_obj))
     
@@ -300,7 +302,7 @@ def addBasicCustomCols(df, qr):
     df['priceToCashFlow'] = df['currentPrice'] / df['freeCashFlowPerShare']
     df['grossProfit'] = (df['grossMargin']/100) * df['revenue']
     df['marketCapital'] = df['shares'] * df['currentPrice']
-    df['totalAssets'] = df['bookValuePerShare'] / df['totalEquity']
+    df['totalAssets'] = (df.bookValuePerShare * df.shares) / (df.totalEquity / 100)
     df['enterpriseValue'] = df['marketCapital'] + (df['totalLiabilities'] * df['totalAssets']) - (df['cashAndShortTermInv'] * df['totalAssets'])
     df['enterpriseToRevenue'] = df['enterpriseValue'] / df['revenue']
     df['EBT'] = (df['operatingIncome'] - (df['netInterestOtherMargin']/100 * df['revenue']))    # aka Pretax Income
@@ -374,7 +376,7 @@ def sendToDB(df):
     with DBHelper() as db:
         db.connect()
         table = 'morningstar'
-        prim_keys = ['date', 'ticker']
+        prim_keys = ['date', 'ticker', 'month']
         for ind, vals in df.reset_index().iterrows():
             val_dict = vals.to_dict()
             db.upsert(table, val_dict, prim_keys)
@@ -383,4 +385,4 @@ def sendToDB(df):
 if __name__ == "__main__":
     # getData(['MCD'])
     # getData(['ALK'])
-    getData()
+    getData(['MSFT'])

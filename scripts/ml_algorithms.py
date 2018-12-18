@@ -6,7 +6,7 @@ sys.path.append("/home/ubuntu/workspace/ml_dev_work")
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-import numpy as np
+
 import pandas as pd
 from sklearn.metrics import accuracy_score
 from sklearn.cross_validation import train_test_split, StratifiedKFold, cross_val_score
@@ -325,25 +325,28 @@ def random_forest(df, xcols, estimators=5):
     # Standardize and split the training nad test data
     X_std = standardize(X)
     ts = 0.3
-    X_train, X_test, y_train, y_test = \
-          train_test_split(X_std, y, test_size=ts, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X_std, y, test_size=ts, random_state=0)
     
     forest = RandomForestClassifier(criterion='entropy',
                                   n_estimators=estimators, 
                                   random_state=1,
                                   n_jobs=3)
     forest.fit(X_train, y_train)
-
+    
+    # Shows the percentage of falling into each class
+    print("Class breakdowns: " + str(forest.predict_proba(X_test[0:1])))
     print('Training accuracy:', forest.score(X_train, y_train))
     print('Test accuracy:', forest.score(X_test, y_test))
+    print("Feature Importances :" + str(forest.feature_importances_))
     
+    pdb.set_trace()
     plot_decision_regions(X_std, y.values, classifier=forest)
     plt.title('Randaom Forest (Decision Tree Ensemble)')
     plt.xlabel(list(X.columns)[0])
     plt.ylabel(list(X.columns)[1])
     plt.legend(loc='upper left')
     plt.tight_layout()
-    plt.savefig(IMG_PATH + 'random_forest' + '.png', dpi=300)
+    plt.savefig(IMG_ROOT + 'snp/kmeans/random_forest.png', dpi=300)
     plt.close()
     
 def k_nearest_neighbors(df, xcols, k=5):

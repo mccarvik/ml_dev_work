@@ -9,7 +9,7 @@ COL_MAP = {
     "COGS" : "cogs",                                                # Margin
     "SG&A" : "sga",                                                # Margin
     "R&D" : "rd",                                                  # Margin
-    "Other" : "other",                                              # Margin
+    "Other" : "other", # should really be 'otherExp'                                      # Margin 
     "Net Int Inc & Other" : "netInterestOtherMargin",               # Margin
     "EBT Margin" : "EBTMargin",                                     # Margin
     # 
